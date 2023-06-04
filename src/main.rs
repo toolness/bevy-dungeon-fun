@@ -44,10 +44,8 @@ fn enable_shadows_on_lights(mut commands: Commands, mut query: Query<&mut PointL
 
     if found {
         for (entity, name) in &other_query {
-            println!("Disabling shadows on {}", name);
-            // This is the mesh for the torch objects.
-            if name.starts_with("Cylinder.001") {
-                println!("Entity: {:?}", name);
+            if name.starts_with("TorchCylinder") {
+                println!("Disabling shadows on {}", name);
                 commands.entity(entity).insert(NotShadowCaster);
             }
         }
