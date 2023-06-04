@@ -19,7 +19,7 @@ fn main() {
     }))
     .add_system(bevy::window::close_on_esc)
     .add_startup_system(setup)
-    .add_system(enable_shadows_on_lights)
+    .add_system(fix_lighting)
     .add_plugin(NoCameraPlayerPlugin)
     .run();
 }
@@ -46,7 +46,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-fn enable_shadows_on_lights(mut commands: Commands, mut query: Query<(&Name, &mut PointLight)>, other_query: Query<(Entity, &Name), Without<NotShadowCaster>>, mut materials: ResMut<Assets<StandardMaterial>>) {
+fn fix_lighting(mut commands: Commands, mut query: Query<(&Name, &mut PointLight)>, other_query: Query<(Entity, &Name), Without<NotShadowCaster>>, mut materials: ResMut<Assets<StandardMaterial>>) {
     let mut found = false;
     for (name, mut light) in &mut query {
         if !light.shadows_enabled {
