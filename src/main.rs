@@ -46,14 +46,14 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-fn enable_shadows_on_lights(mut commands: Commands, mut query: Query<&mut PointLight>, other_query: Query<(Entity, &Name), Without<NotShadowCaster>>, mut materials: ResMut<Assets<StandardMaterial>>) {
+fn enable_shadows_on_lights(mut commands: Commands, mut query: Query<(&Name, &mut PointLight)>, other_query: Query<(Entity, &Name), Without<NotShadowCaster>>, mut materials: ResMut<Assets<StandardMaterial>>) {
     let mut found = false;
-    for mut entity in &mut query {
-        if !entity.shadows_enabled {
+    for (name, mut light) in &mut query {
+        if !light.shadows_enabled {
             // Even though we've told the light to cast shadows in Blender, either Blender's glTF exporter doesn't
             // export this, or bevy doesn't import it. Either way, we need to enable it manually.
-            info!("Enabling shadows for light!");
-            entity.shadows_enabled = true;
+            info!("Enabling shadows for light {}.", name);
+            light.shadows_enabled = true;
             found = true;
         }
     }
