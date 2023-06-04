@@ -1,4 +1,4 @@
-use bevy::{prelude::*, pbr::{PointLightShadowMap, NotShadowCaster}};
+use bevy::{prelude::*, pbr::{PointLightShadowMap, NotShadowCaster}, window::WindowMode};
 use bevy_flycam::prelude::*;
 
 fn main() {
@@ -9,7 +9,13 @@ fn main() {
     })
     .insert_resource(ClearColor(blueish))
     .insert_resource(PointLightShadowMap { size: 4096 })
-    .add_plugins(DefaultPlugins)
+    .add_plugins(DefaultPlugins.set(WindowPlugin {
+        primary_window: Some(Window {
+            mode: WindowMode::BorderlessFullscreen,
+            ..Default::default()
+        }),
+        ..Default::default()
+    }))
     .add_system(bevy::window::close_on_esc)
     .add_startup_system(setup)
     .add_system(enable_shadows_on_lights)
