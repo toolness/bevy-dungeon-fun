@@ -10,6 +10,7 @@ fn main() {
     .insert_resource(ClearColor(blueish))
     .insert_resource(PointLightShadowMap { size: 4096 })
     .add_plugins(DefaultPlugins)
+    .add_system(bevy::window::close_on_esc)
     .add_startup_system(setup)
     .add_system(enable_shadows_on_lights)
     .add_plugin(NoCameraPlayerPlugin)
