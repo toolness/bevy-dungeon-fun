@@ -1,4 +1,4 @@
-use bevy::{prelude::*, pbr::PointLightShadowMap};
+use bevy::{prelude::*, pbr::{PointLightShadowMap, NotShadowCaster}};
 use bevy_flycam::prelude::*;
 
 fn main() {
@@ -11,6 +11,7 @@ fn main() {
     .insert_resource(PointLightShadowMap { size: 4096 })
     .add_plugins(DefaultPlugins)
     .add_startup_system(setup)
+    .add_system(enable_shadows_on_lights)
     .add_plugin(NoCameraPlayerPlugin)
     .run();
 }
@@ -29,4 +30,26 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         scene,
         ..default()
     });
+}
+
+fn enable_shadows_on_lights(mut commands: Commands, mut query: Query<&mut PointLight>, other_query: Query<(Entity, &Name), Without<NotShadowCaster>>) {
+    let mut found = false;
+    for mut entity in &mut query {
+        if !entity.shadows_enabled {
+            println!("Enabling shadows for light!");
+            entity.shadows_enabled = true;
+            found = true;
+        }
+    }
+
+    if found {
+        for (entity, name) in &other_query {
+            println!("Disabling shadows on {}", name);
+            // This is the mesh for the torch objects.
+            if name.starts_with("Cylinder.001") {
+                println!("Entity: {:?}", name);
+                commands.entity(entity).insert(NotShadowCaster);
+            }
+        }
+    }
 }
