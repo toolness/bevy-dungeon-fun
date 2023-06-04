@@ -9,6 +9,7 @@ fn main() {
     })
     .insert_resource(ClearColor(blueish))
     .insert_resource(PointLightShadowMap { size: 4096 })
+    .insert_resource(Msaa::Sample4)
     .add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             mode: WindowMode::BorderlessFullscreen,
