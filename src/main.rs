@@ -1,4 +1,4 @@
-use bevy::{prelude::*, pbr::{PointLightShadowMap, NotShadowCaster}, window::WindowMode};
+use bevy::{prelude::*, pbr::{PointLightShadowMap, NotShadowCaster}, window::WindowMode, core_pipeline::{tonemapping::Tonemapping, bloom::BloomSettings}};
 use bevy_flycam::prelude::*;
 
 fn main() {
@@ -28,9 +28,15 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let player_height = 1.5;
     commands.spawn((
         Camera3dBundle {
+            camera: Camera {
+                hdr: true,
+                ..default()
+            },
             transform: Transform::from_xyz(0.0, player_height, 0.5).looking_at(Vec3::new(1.0, player_height, 0.0), Vec3::Y),
+            tonemapping: Tonemapping::TonyMcMapface,
             ..default()
         },
+        BloomSettings::default(),
         FlyCam
     ));
     let scene = asset_server.load("dungeon.gltf#Scene0");
@@ -40,11 +46,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-fn enable_shadows_on_lights(mut commands: Commands, mut query: Query<&mut PointLight>, other_query: Query<(Entity, &Name), Without<NotShadowCaster>>) {
+fn enable_shadows_on_lights(mut commands: Commands, mut query: Query<&mut PointLight>, other_query: Query<(Entity, &Name), Without<NotShadowCaster>>, mut materials: ResMut<Assets<StandardMaterial>>) {
     let mut found = false;
     for mut entity in &mut query {
         if !entity.shadows_enabled {
-            println!("Enabling shadows for light!");
+            // Even though we've told the light to cast shadows in Blender, either Blender's glTF exporter doesn't
+            // export this, or bevy doesn't import it. Either way, we need to enable it manually.
+            info!("Enabling shadows for light!");
             entity.shadows_enabled = true;
             found = true;
         }
@@ -53,8 +61,23 @@ fn enable_shadows_on_lights(mut commands: Commands, mut query: Query<&mut PointL
     if found {
         for (entity, name) in &other_query {
             if name.starts_with("TorchCylinder") {
-                println!("Disabling shadows on {}", name);
+                // We've set the torches to not cast shadows in Blender, but either Blender's glTF exporter doesn't
+                // export this, or bevy doesn't import it. Either way, we need to set it manually.
+                info!("Disabling shadows on {}.", name);
                 commands.entity(entity).insert(NotShadowCaster);
+            }
+        }
+
+        for (_handle, mat) in materials.iter_mut() {
+            let [r, g, b, _a] = mat.emissive.as_linear_rgba_f32();
+            let scale: f32 = 10.0;
+            if r > 0.0 || g > 0.0 || b > 0.0 {
+                // Bring the color into HDR space so bevy applies bloom to it.
+                //
+                // TODO: We should probably grab the material by name, rather than scaling
+                // every single emissive material.
+                info!("Scaling emissive {:?} by a factor of {}.", mat.emissive, scale);
+                mat.emissive = Color::rgb_linear(r * scale, g * scale, b * scale);
             }
         }
     }
