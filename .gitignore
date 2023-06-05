@@ -1,5 +1,9 @@
 /target
 
+out/
+dist/
+node_modules/
+
 # blender backup files
 *.blend1
 
