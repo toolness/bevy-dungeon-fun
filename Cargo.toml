@@ -6,9 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# Replace with the following before releasing.
-# bevy = "0.10.1"
-bevy = { version = "0.10.0", features = ["dynamic_linking"] }
+bevy = "0.10.1"
 bevy_flycam = "0.10.1"
 
 # Enable a small amount of optimization in debug mode
