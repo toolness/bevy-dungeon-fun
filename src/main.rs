@@ -35,7 +35,7 @@ fn main() {
             }),
             ..Default::default()
         }))
-        .add_system(bevy::window::close_on_esc)
+        .add_system(bevy::window::close_on_esc.run_if(is_not_wasm))
         .add_startup_system(setup)
         .add_system(fix_lighting.run_if(did_scene_load.and_then(run_once())))
         .add_plugin(NoCameraPlayerPlugin)
@@ -43,6 +43,10 @@ fn main() {
 }
 
 const GLTF_SCENE: &str = "dungeon.gltf#Scene0";
+
+fn is_not_wasm() -> bool {
+    !cfg!(target_arch = "wasm32")
+}
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let player_height = 1.5;
