@@ -79,7 +79,11 @@ fn setup_physics(mut commands: Commands) {
 
     commands
         .spawn(RigidBody::Dynamic)
-        .insert(Collider::ball(0.5))
+        .insert(Collider::capsule(
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.0, 1.0, 0.0),
+            0.5,
+        ))
         .insert(Restitution::coefficient(1.5))
         .insert(TransformBundle::from(Transform::from_xyz(4.0, 4.0, 0.0)));
 }
