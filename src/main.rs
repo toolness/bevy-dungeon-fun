@@ -6,6 +6,7 @@ use bevy::{
     window::WindowMode,
 };
 use bevy_flycam::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 fn main() {
     let windowed = std::env::args().any(|a| a == "--windowed");
@@ -35,8 +36,14 @@ fn main() {
             }),
             ..Default::default()
         }))
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
+        .add_plugin(RapierDebugRenderPlugin {
+            always_on_top: true,
+            ..default()
+        })
         .add_system(bevy::window::close_on_esc.run_if(is_not_wasm))
         .add_startup_system(setup)
+        .add_startup_system(setup_physics)
         .add_system(fix_lighting.run_if(did_scene_load.and_then(run_once())))
         .add_plugin(NoCameraPlayerPlugin)
         .run();
@@ -66,6 +73,18 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
     let scene = asset_server.load(GLTF_SCENE);
     commands.spawn(SceneBundle { scene, ..default() });
+}
+
+fn setup_physics(mut commands: Commands) {
+    commands
+        .spawn(Collider::cuboid(100.0, 0.1, 100.0))
+        .insert(TransformBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)));
+
+    commands
+        .spawn(RigidBody::Dynamic)
+        .insert(Collider::ball(0.5))
+        .insert(Restitution::coefficient(1.5))
+        .insert(TransformBundle::from(Transform::from_xyz(4.0, 4.0, 0.0)));
 }
 
 fn did_scene_load(asset_server: Res<AssetServer>) -> bool {
