@@ -5,7 +5,6 @@ use bevy::{
     prelude::*,
     window::WindowMode,
 };
-use bevy_flycam::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 fn main() {
@@ -45,7 +44,6 @@ fn main() {
         .add_startup_system(setup)
         .add_startup_system(setup_physics)
         .add_system(fix_lighting.run_if(did_scene_load.and_then(run_once())))
-        .add_plugin(NoCameraPlayerPlugin)
         .run();
 }
 
@@ -69,7 +67,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
         BloomSettings::default(),
-        FlyCam,
     ));
     let scene = asset_server.load(GLTF_SCENE);
     commands.spawn(SceneBundle { scene, ..default() });

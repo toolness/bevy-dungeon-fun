@@ -7,7 +7,6 @@ version = "0.1.0"
 
 [dependencies]
 bevy = "0.10.1"
-bevy_flycam = "0.10.1"
 # We can't use 0.21.0 due to https://github.com/dimforge/bevy_rapier/issues/345. Once 0.22 is
 # released, we can switch to that.
 bevy_rapier3d = {git = "https://github.com/dimforge/bevy_rapier.git"}
