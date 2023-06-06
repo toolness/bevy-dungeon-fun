@@ -1,4 +1,4 @@
-use bevy::{prelude::*, pbr::{PointLightShadowMap, NotShadowCaster}, window::WindowMode, core_pipeline::{tonemapping::Tonemapping, bloom::BloomSettings}};
+use bevy::{prelude::*, pbr::{PointLightShadowMap, NotShadowCaster}, window::WindowMode, core_pipeline::{tonemapping::Tonemapping, bloom::BloomSettings}, asset::LoadState};
 use bevy_flycam::prelude::*;
 
 fn main() {
@@ -19,10 +19,12 @@ fn main() {
     }))
     .add_system(bevy::window::close_on_esc)
     .add_startup_system(setup)
-    .add_system(fix_lighting)
+    .add_system(fix_lighting.run_if(did_scene_load))
     .add_plugin(NoCameraPlayerPlugin)
     .run();
 }
+
+const GLTF_SCENE: &str = "dungeon.gltf#Scene0";
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let player_height = 1.5;
@@ -39,11 +41,16 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         BloomSettings::default(),
         FlyCam
     ));
-    let scene = asset_server.load("dungeon.gltf#Scene0");
+    let scene = asset_server.load(GLTF_SCENE);
     commands.spawn(SceneBundle {
         scene,
         ..default()
     });
+}
+
+fn did_scene_load(asset_server: Res<AssetServer>) -> bool {
+    let handle = asset_server.get_handle_untyped(GLTF_SCENE);
+    asset_server.get_load_state(handle) == LoadState::Loaded
 }
 
 fn fix_lighting(mut commands: Commands, mut query: Query<(&Name, &mut PointLight)>, other_query: Query<(Entity, &Name), Without<NotShadowCaster>>, mut materials: ResMut<Assets<StandardMaterial>>) {
