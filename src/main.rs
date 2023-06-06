@@ -19,7 +19,7 @@ fn main() {
     }))
     .add_system(bevy::window::close_on_esc)
     .add_startup_system(setup)
-    .add_system(fix_lighting.run_if(did_scene_load))
+    .add_system(fix_lighting.run_if(did_scene_load.and_then(run_once())))
     .add_plugin(NoCameraPlayerPlugin)
     .run();
 }
