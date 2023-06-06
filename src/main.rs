@@ -8,6 +8,12 @@ use bevy::{
 use bevy_flycam::prelude::*;
 
 fn main() {
+    let windowed = std::env::args().any(|a| a == "--windowed");
+    let mode = if windowed {
+        WindowMode::Windowed
+    } else {
+        WindowMode::BorderlessFullscreen
+    };
     let blueish = Color::Rgba {
         red: 0.052,
         green: 0.049,
@@ -24,7 +30,7 @@ fn main() {
         .insert_resource(Msaa::Sample4)
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                mode: WindowMode::BorderlessFullscreen,
+                mode,
                 ..Default::default()
             }),
             ..Default::default()
