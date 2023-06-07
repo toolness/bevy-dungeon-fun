@@ -2,6 +2,7 @@ mod player;
 
 use bevy::{
     asset::LoadState,
+    input::keyboard,
     pbr::{NotShadowCaster, PointLightShadowMap},
     prelude::*,
     window::WindowMode,
@@ -40,12 +41,14 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin {
             always_on_top: true,
+            enabled: false,
             ..default()
         })
         .add_system(bevy::window::close_on_esc.run_if(is_not_wasm))
         .add_startup_system(setup_scene)
         .add_plugin(PlayerPlugin)
         .add_startup_system(setup_physics)
+        .add_system(toggle_debug_mode)
         .add_system(fix_scene_lighting.run_if(did_scene_load.and_then(run_once())))
         .run();
 }
@@ -59,6 +62,15 @@ fn is_not_wasm() -> bool {
 fn setup_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
     let scene = asset_server.load(GLTF_SCENE);
     commands.spawn(SceneBundle { scene, ..default() });
+}
+
+fn toggle_debug_mode(
+    keyboard_input: Res<Input<keyboard::KeyCode>>,
+    mut context: ResMut<DebugRenderContext>,
+) {
+    if keyboard_input.just_pressed(keyboard::KeyCode::G) {
+        context.enabled = !context.enabled;
+    }
 }
 
 fn setup_physics(mut commands: Commands) {
