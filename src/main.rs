@@ -2,6 +2,7 @@ mod player;
 
 use bevy::{
     asset::LoadState,
+    gltf::Gltf,
     input::keyboard,
     pbr::{NotShadowCaster, PointLightShadowMap},
     prelude::*,
@@ -48,16 +49,14 @@ fn main() {
         .add_startup_system(setup_scene)
         .add_plugin(PlayerPlugin)
         .add_system(toggle_debug_mode)
-        .add_systems(
-            (
-                fix_scene_emissive_materials,
-                fix_scene_point_lights,
-                fix_scene_torches,
-                fix_scene_physics,
-            )
-                .distributive_run_if(did_scene_load)
-                .distributive_run_if(run_once()),
-        )
+        .add_systems((
+            // We can't use distributive_run_if because it raises weird trait errors, so
+            // we'll have to use run_if conditionally here.
+            fix_scene_emissive_materials.run_if(did_scene_load.and_then(run_once())),
+            fix_scene_point_lights.run_if(did_scene_load.and_then(run_once())),
+            fix_scene_torches.run_if(did_scene_load.and_then(run_once())),
+            fix_scene_physics.run_if(did_scene_load.and_then(run_once())),
+        ))
         .run();
 }
 
@@ -81,9 +80,17 @@ fn toggle_debug_mode(
     }
 }
 
-fn did_scene_load(asset_server: Res<AssetServer>) -> bool {
-    let handle = asset_server.get_handle_untyped(GLTF_SCENE);
-    asset_server.get_load_state(handle) == LoadState::Loaded
+/// We used to do this by querying the asset server to see if our
+/// glTF had loaded yet, but this wasn't always accurate, I think
+/// because the asset loader likely enqueued commands that still
+/// needed to run before this system was called, or something
+/// bizarre.
+///
+/// In any case, we know there are point lights in our scene that
+/// aren't in the world at initialization, so we'll just wait
+/// for some lights to exist.
+fn did_scene_load(query: Query<Entity, With<PointLight>>) -> bool {
+    return !query.is_empty();
 }
 
 fn fix_scene_physics(
