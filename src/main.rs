@@ -1,8 +1,6 @@
 mod player;
 
 use bevy::{
-    asset::LoadState,
-    gltf::Gltf,
     input::keyboard,
     pbr::{NotShadowCaster, PointLightShadowMap},
     prelude::*,
