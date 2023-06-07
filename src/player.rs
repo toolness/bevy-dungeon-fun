@@ -1,6 +1,7 @@
 use bevy::{
     core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping},
     prelude::*,
+    window::{CursorGrabMode, PrimaryWindow},
 };
 use bevy_rapier3d::prelude::*;
 
@@ -92,11 +93,21 @@ fn player_movement(
     }
 }
 
+fn grab_cursor(mut primary_window: Query<&mut Window, With<PrimaryWindow>>) {
+    if let Ok(mut window) = primary_window.get_single_mut() {
+        window.cursor.grab_mode = CursorGrabMode::Confined;
+        window.cursor.visible = false;
+    } else {
+        warn!("No primary window when trying to grab cursor!");
+    }
+}
+
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(setup_player)
+            .add_startup_system(grab_cursor)
             .add_system(player_movement);
     }
 }
