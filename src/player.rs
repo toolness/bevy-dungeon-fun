@@ -34,7 +34,7 @@ fn setup_player(mut commands: Commands) {
                     hdr: true,
                     ..default()
                 },
-                transform: Transform::from_xyz(0.0, CAMERA_HEIGHT, 0.5)
+                transform: Transform::from_xyz(0.0, CAMERA_HEIGHT, 0.0)
                     .looking_at(Vec3::new(1.0, CAMERA_HEIGHT, 0.0), Vec3::Y),
                 tonemapping: Tonemapping::TonyMcMapface,
                 ..default()
