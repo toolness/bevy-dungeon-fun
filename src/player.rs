@@ -4,12 +4,19 @@ use bevy::{
 };
 use bevy_rapier3d::prelude::*;
 
+/// Player speed in meters per second.
 const PLAYER_SPEED: f32 = 5.0;
 
+/// The distance of the camera from the bottom of the player's capsule.
+const CAMERA_HEIGHT: f32 = 1.0;
+
+/// The radius of the player's capsule.
+const CAPSULE_RADIUS: f32 = 0.25;
+
+/// The height of the cylindrical part of the player's capsule.
+const CAPSULE_CYLINDER_HEIGHT: f32 = 1.0;
+
 pub fn setup_player(mut commands: Commands) {
-    let camera_height = 1.0;
-    let capsule_radius = 0.25;
-    let capsule_cylinder_height = 1.0;
     let camera = commands
         .spawn((
             Camera3dBundle {
@@ -17,8 +24,8 @@ pub fn setup_player(mut commands: Commands) {
                     hdr: true,
                     ..default()
                 },
-                transform: Transform::from_xyz(0.0, camera_height, 0.5)
-                    .looking_at(Vec3::new(1.0, camera_height, 0.0), Vec3::Y),
+                transform: Transform::from_xyz(0.0, CAMERA_HEIGHT, 0.5)
+                    .looking_at(Vec3::new(1.0, CAMERA_HEIGHT, 0.0), Vec3::Y),
                 tonemapping: Tonemapping::TonyMcMapface,
                 ..default()
             },
@@ -30,10 +37,10 @@ pub fn setup_player(mut commands: Commands) {
             RigidBody::KinematicPositionBased,
             Collider::capsule(
                 Vec3::new(0.0, 0.0, 0.0),
-                Vec3::new(0.0, capsule_cylinder_height, 0.0),
-                capsule_radius,
+                Vec3::new(0.0, CAPSULE_CYLINDER_HEIGHT, 0.0),
+                CAPSULE_RADIUS,
             ),
-            TransformBundle::from(Transform::from_xyz(0.0, capsule_radius, 0.0)),
+            TransformBundle::from(Transform::from_xyz(0.0, CAPSULE_RADIUS, 0.0)),
             KinematicCharacterController {
                 up: Vec3::Y,
                 ..default()
