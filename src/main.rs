@@ -49,7 +49,15 @@ fn main() {
         .add_plugin(PlayerPlugin)
         .add_startup_system(setup_physics)
         .add_system(toggle_debug_mode)
-        .add_system(fix_scene_lighting.run_if(did_scene_load.and_then(run_once())))
+        .add_systems(
+            (
+                fix_scene_emissive_materials,
+                fix_scene_point_lights,
+                fix_scene_torches,
+            )
+                .distributive_run_if(did_scene_load)
+                .distributive_run_if(run_once()),
+        )
         .run();
 }
 
@@ -94,30 +102,38 @@ fn did_scene_load(asset_server: Res<AssetServer>) -> bool {
     asset_server.get_load_state(handle) == LoadState::Loaded
 }
 
-fn fix_scene_lighting(
-    mut commands: Commands,
-    mut query: Query<(&Name, &mut PointLight)>,
-    other_query: Query<(Entity, &Name), Without<NotShadowCaster>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    for (name, mut light) in &mut query {
+fn fix_scene_point_lights(mut query: Query<&mut PointLight>) {
+    let mut count = 0;
+    for mut light in &mut query {
         if !light.shadows_enabled {
             // Even though we've told the light to cast shadows in Blender, either Blender's glTF exporter doesn't
             // export this, or bevy doesn't import it. Either way, we need to enable it manually.
-            info!("Enabling shadows for light {}.", name);
+            count += 1;
             light.shadows_enabled = true;
         }
     }
 
-    for (entity, name) in &other_query {
+    info!("Enabled shadows for {} point lights.", count);
+}
+
+fn fix_scene_torches(
+    mut commands: Commands,
+    query: Query<(Entity, &Name), Without<NotShadowCaster>>,
+) {
+    let mut count = 0;
+    for (entity, name) in &query {
         if name.starts_with("TorchCylinder") {
             // We've set the torches to not cast shadows in Blender, but either Blender's glTF exporter doesn't
             // export this, or bevy doesn't import it. Either way, we need to set it manually.
-            info!("Disabling shadows on {}.", name);
+            count += 1;
             commands.entity(entity).insert(NotShadowCaster);
         }
     }
 
+    info!("Disabled shadows for {} torches.", count);
+}
+
+fn fix_scene_emissive_materials(mut materials: ResMut<Assets<StandardMaterial>>) {
     for (_handle, mat) in materials.iter_mut() {
         let [r, g, b, _a] = mat.emissive.as_linear_rgba_f32();
         let scale: f32 = 10.0;
