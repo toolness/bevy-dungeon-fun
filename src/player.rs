@@ -16,7 +16,7 @@ const CAPSULE_RADIUS: f32 = 0.25;
 /// The height of the cylindrical part of the player's capsule.
 const CAPSULE_CYLINDER_HEIGHT: f32 = 1.0;
 
-pub fn setup_player(mut commands: Commands) {
+fn setup_player(mut commands: Commands) {
     let camera = commands
         .spawn((
             Camera3dBundle {
@@ -50,7 +50,7 @@ pub fn setup_player(mut commands: Commands) {
     commands.entity(player_capsule).push_children(&[camera]);
 }
 
-pub fn player_movement(
+fn player_movement(
     time: Res<Time>,
     keys: Res<Input<KeyCode>>,
     mut controller_query: Query<&mut KinematicCharacterController>,
@@ -89,5 +89,14 @@ pub fn player_movement(
         let desired_translation = velocity * time.delta_seconds() * PLAYER_SPEED;
 
         controller.translation = Some(desired_translation);
+    }
+}
+
+pub struct PlayerPlugin;
+
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(setup_player)
+            .add_system(player_movement);
     }
 }

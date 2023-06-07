@@ -7,7 +7,7 @@ use bevy::{
     window::WindowMode,
 };
 use bevy_rapier3d::prelude::*;
-use player::{player_movement, setup_player};
+use player::PlayerPlugin;
 
 fn main() {
     let windowed = std::env::args().any(|a| a == "--windowed");
@@ -44,10 +44,9 @@ fn main() {
         })
         .add_system(bevy::window::close_on_esc.run_if(is_not_wasm))
         .add_startup_system(setup_scene)
-        .add_startup_system(setup_player)
+        .add_plugin(PlayerPlugin)
         .add_startup_system(setup_physics)
         .add_system(fix_scene_lighting.run_if(did_scene_load.and_then(run_once())))
-        .add_system(player_movement)
         .run();
 }
 
