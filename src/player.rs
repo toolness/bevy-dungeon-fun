@@ -1,5 +1,9 @@
+use std::f32::consts::{E, FRAC_PI_2};
+
 use bevy::{
     core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping},
+    ecs::event::ManualEventReader,
+    input::mouse::MouseMotion,
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
 };
@@ -16,6 +20,11 @@ const CAPSULE_RADIUS: f32 = 0.25;
 
 /// The height of the cylindrical part of the player's capsule.
 const CAPSULE_CYLINDER_HEIGHT: f32 = 1.0;
+
+const MOUSE_SENSITIVITY: f32 = 0.00012;
+
+#[derive(Resource, Default)]
+struct MouseMotionState(ManualEventReader<MouseMotion>);
 
 fn setup_player(mut commands: Commands) {
     let camera = commands
@@ -62,6 +71,7 @@ fn player_movement(
             warn!("Parent of camera has no kinematic character controller!");
             continue;
         };
+        // This is mostly taken from bevy_flycam's movement code.
         let mut velocity = Vec3::ZERO;
         let local_z = transform.local_z();
         let forward = -Vec3::new(local_z.x, 0., local_z.z);
@@ -93,6 +103,34 @@ fn player_movement(
     }
 }
 
+fn player_look(
+    primary_window: Query<&mut Window, With<PrimaryWindow>>,
+    mut mouse_motion: ResMut<MouseMotionState>,
+    motion_events: Res<Events<MouseMotion>>,
+    mut query: Query<&mut Transform, With<Camera3d>>,
+) {
+    let Ok(window) = primary_window.get_single() else {
+        warn!("No primary window when trying to mouselook!");
+        return;
+    };
+    for mut transform in &mut query {
+        for event in mouse_motion.0.iter(&motion_events) {
+            // This is mostly taken from bevy_flycam's mouselook code.
+            let (mut yaw, mut pitch, _) = transform.rotation.to_euler(EulerRot::YXZ);
+            // Using smallest of height or width ensures equal vertical and horizontal sensitivity.
+            let window_scale = window.height().min(window.width());
+            pitch -= (MOUSE_SENSITIVITY * event.delta.y * window_scale)
+                .to_radians()
+                .clamp(-FRAC_PI_2, FRAC_PI_2);
+            yaw -= (MOUSE_SENSITIVITY * event.delta.x * window_scale).to_radians();
+
+            // Order is important to prevent unintended roll.
+            transform.rotation =
+                Quat::from_axis_angle(Vec3::Y, yaw) * Quat::from_axis_angle(Vec3::X, pitch);
+        }
+    }
+}
+
 fn grab_cursor(mut primary_window: Query<&mut Window, With<PrimaryWindow>>) {
     if let Ok(mut window) = primary_window.get_single_mut() {
         window.cursor.grab_mode = CursorGrabMode::Confined;
@@ -106,8 +144,10 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_player)
+        app.init_resource::<MouseMotionState>()
+            .add_startup_system(setup_player)
             .add_startup_system(grab_cursor)
-            .add_system(player_movement);
+            .add_system(player_movement)
+            .add_system(player_look);
     }
 }
