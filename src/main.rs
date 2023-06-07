@@ -45,6 +45,7 @@ fn main() {
         .add_startup_system(setup_player)
         .add_startup_system(setup_physics)
         .add_system(fix_scene_lighting.run_if(did_scene_load.and_then(run_once())))
+        .add_system(player_movement)
         .run();
 }
 
@@ -82,6 +83,10 @@ fn setup_player(mut commands: Commands) {
                 capsule_radius,
             ),
             TransformBundle::from(Transform::from_xyz(0.0, capsule_radius, 0.0)),
+            KinematicCharacterController {
+                up: Vec3::Y,
+                ..default()
+            },
         ))
         .id();
     commands.entity(player_capsule).push_children(&[camera]);
@@ -90,6 +95,50 @@ fn setup_player(mut commands: Commands) {
 fn setup_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
     let scene = asset_server.load(GLTF_SCENE);
     commands.spawn(SceneBundle { scene, ..default() });
+}
+
+const PLAYER_SPEED: f32 = 5.0;
+
+fn player_movement(
+    time: Res<Time>,
+    keys: Res<Input<KeyCode>>,
+    mut controller_query: Query<&mut KinematicCharacterController>,
+    camera_query: Query<(&Parent, &Transform), With<Camera>>,
+) {
+    for (parent, transform) in &camera_query {
+        let Ok(mut controller) = controller_query.get_mut(parent.get()) else {
+            warn!("Parent of camera has no kinematic character controller!");
+            continue;
+        };
+        let mut velocity = Vec3::ZERO;
+        let local_z = transform.local_z();
+        let forward = -Vec3::new(local_z.x, 0., local_z.z);
+        let right = Vec3::new(local_z.z, 0., -local_z.x);
+
+        for key in keys.get_pressed() {
+            match key {
+                KeyCode::W => {
+                    velocity += forward;
+                }
+                KeyCode::A => {
+                    velocity -= right;
+                }
+                KeyCode::S => {
+                    velocity -= forward;
+                }
+                KeyCode::D => {
+                    velocity += right;
+                }
+                _ => {}
+            }
+        }
+
+        velocity = velocity.normalize_or_zero();
+
+        let desired_translation = velocity * time.delta_seconds() * PLAYER_SPEED;
+
+        controller.translation = Some(desired_translation);
+    }
 }
 
 fn setup_physics(mut commands: Commands) {
