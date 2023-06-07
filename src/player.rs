@@ -23,6 +23,8 @@ const CAPSULE_CYLINDER_HEIGHT: f32 = 1.0;
 
 const MOUSE_SENSITIVITY: f32 = 0.00012;
 
+const MAX_PITCH: f32 = FRAC_PI_2 - 0.01;
+
 #[derive(Resource, Default)]
 struct MouseMotionState(ManualEventReader<MouseMotion>);
 
@@ -119,10 +121,10 @@ fn player_look(
             let (mut yaw, mut pitch, _) = transform.rotation.to_euler(EulerRot::YXZ);
             // Using smallest of height or width ensures equal vertical and horizontal sensitivity.
             let window_scale = window.height().min(window.width());
-            pitch -= (MOUSE_SENSITIVITY * event.delta.y * window_scale)
-                .to_radians()
-                .clamp(-FRAC_PI_2, FRAC_PI_2);
+            pitch -= (MOUSE_SENSITIVITY * event.delta.y * window_scale).to_radians();
             yaw -= (MOUSE_SENSITIVITY * event.delta.x * window_scale).to_radians();
+
+            pitch = pitch.clamp(-MAX_PITCH, MAX_PITCH);
 
             // Order is important to prevent unintended roll.
             transform.rotation =
