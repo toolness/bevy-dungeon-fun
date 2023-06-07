@@ -55,10 +55,9 @@ fn is_not_wasm() -> bool {
 }
 
 fn setup_player(mut commands: Commands) {
-    let capsule_radius = 0.25;
     let camera_height = 1.0;
-    let capsule_length = 1.0;
-    // Total player height is: capsule_radius * 2.0 + capsule_length
+    let capsule_radius = 0.25;
+    let capsule_cylinder_height = 1.0;
     let camera = commands
         .spawn((
             Camera3dBundle {
@@ -79,7 +78,7 @@ fn setup_player(mut commands: Commands) {
             RigidBody::KinematicPositionBased,
             Collider::capsule(
                 Vec3::new(0.0, 0.0, 0.0),
-                Vec3::new(0.0, capsule_length, 0.0),
+                Vec3::new(0.0, capsule_cylinder_height, 0.0),
                 capsule_radius,
             ),
             TransformBundle::from(Transform::from_xyz(0.0, capsule_radius, 0.0)),
