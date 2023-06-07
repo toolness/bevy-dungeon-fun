@@ -47,7 +47,6 @@ fn main() {
         .add_system(bevy::window::close_on_esc.run_if(is_not_wasm))
         .add_startup_system(setup_scene)
         .add_plugin(PlayerPlugin)
-        .add_startup_system(setup_physics)
         .add_system(toggle_debug_mode)
         .add_systems(
             (
@@ -82,37 +81,66 @@ fn toggle_debug_mode(
     }
 }
 
-fn setup_physics(mut commands: Commands) {
-    commands
-        .spawn(Collider::cuboid(100.0, 0.1, 100.0))
-        .insert(TransformBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)));
-
-    commands
-        .spawn(RigidBody::Dynamic)
-        .insert(Collider::capsule(
-            Vec3::new(0.0, 0.0, 0.0),
-            Vec3::new(0.0, 1.0, 0.0),
-            0.5,
-        ))
-        .insert(Restitution::coefficient(1.5))
-        .insert(TransformBundle::from(Transform::from_xyz(4.0, 4.0, 0.0)));
-}
-
 fn did_scene_load(asset_server: Res<AssetServer>) -> bool {
     let handle = asset_server.get_handle_untyped(GLTF_SCENE);
     asset_server.get_load_state(handle) == LoadState::Loaded
 }
 
-fn fix_scene_physics(mut query: Query<(&Name, &mut Visibility), With<Transform>>) {
+fn fix_scene_physics(
+    mut commands: Commands,
+    mut query: Query<(Entity, &Name, &mut Visibility, &Transform, &Children)>,
+    child_meshes_query: Query<(&Name, &Handle<Mesh>)>,
+    meshes: Res<Assets<Mesh>>,
+) {
     let mut count = 0;
-    for (name, mut visibility) in &mut query {
+    info!("Iterating over {} meshes.", query.iter().count());
+    for (entity, name, mut visibility, transform, children) in &mut query {
         if name.ends_with("-colonly") {
             count += 1;
             *visibility = Visibility::Hidden;
+            let Some(child) = children.first() else {
+                warn!(
+                    "colonly object {} has no children, expected 1.",
+                    name,
+                );
+                continue;
+            };
+            let Ok((child_name, mesh_handle)) = child_meshes_query.get(*child) else {
+                warn!(
+                    "colonly object {} first child has no mesh.",
+                    name,
+                );
+                continue;
+            };
+            if children.len() > 1 {
+                warn!(
+                    "colonly object {} has {} children, expected 1.",
+                    name,
+                    children.len()
+                );
+                continue;
+            }
+            let Some(mesh) = meshes.get(mesh_handle) else {
+                warn!(
+                    "colonly object {} mesh {} not loaded.",
+                    name,
+                    child_name
+                );
+                continue;
+            };
+            let Some(collider) = Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh) else {
+                warn!(
+                    "unable to generate rapier collider from colonly object {} mesh {}.",
+                    name,
+                    child_name
+                );
+                continue;
+            };
+            commands.entity(entity).insert(collider);
         }
     }
 
-    info!("Hid {} collision-only meshes.", count);
+    info!("Converted {} collision-only meshes.", count);
 }
 
 fn fix_scene_point_lights(mut query: Query<&mut PointLight>) {

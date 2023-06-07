@@ -15,7 +15,7 @@ const PLAYER_SPEED: f32 = 5.0;
 const CAMERA_HEIGHT: f32 = 1.0;
 
 /// The radius of the player's capsule.
-const CAPSULE_RADIUS: f32 = 0.25;
+const CAPSULE_RADIUS: f32 = 0.5;
 
 /// The height of the cylindrical part of the player's capsule.
 const CAPSULE_CYLINDER_HEIGHT: f32 = 1.0;
