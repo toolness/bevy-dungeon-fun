@@ -88,13 +88,13 @@ fn did_scene_load(asset_server: Res<AssetServer>) -> bool {
 
 fn fix_scene_physics(
     mut commands: Commands,
-    mut query: Query<(Entity, &Name, &mut Visibility, &Transform, &Children)>,
+    mut query: Query<(Entity, &Name, &mut Visibility, &Children)>,
     child_meshes_query: Query<(&Name, &Handle<Mesh>)>,
     meshes: Res<Assets<Mesh>>,
 ) {
     let mut count = 0;
     info!("Iterating over {} meshes.", query.iter().count());
-    for (entity, name, mut visibility, transform, children) in &mut query {
+    for (entity, name, mut visibility, children) in &mut query {
         if name.ends_with("-colonly") {
             count += 1;
             *visibility = Visibility::Hidden;
