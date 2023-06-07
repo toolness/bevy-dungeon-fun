@@ -41,9 +41,10 @@ fn main() {
             ..default()
         })
         .add_system(bevy::window::close_on_esc.run_if(is_not_wasm))
-        .add_startup_system(setup)
+        .add_startup_system(setup_scene)
+        .add_startup_system(setup_player)
         .add_startup_system(setup_physics)
-        .add_system(fix_lighting.run_if(did_scene_load.and_then(run_once())))
+        .add_system(fix_scene_lighting.run_if(did_scene_load.and_then(run_once())))
         .run();
 }
 
@@ -53,21 +54,41 @@ fn is_not_wasm() -> bool {
     !cfg!(target_arch = "wasm32")
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let player_height = 1.5;
-    commands.spawn((
-        Camera3dBundle {
-            camera: Camera {
-                hdr: true,
+fn setup_player(mut commands: Commands) {
+    let capsule_radius = 0.25;
+    let camera_height = 1.0;
+    let capsule_length = 1.0;
+    // Total player height is: capsule_radius * 2.0 + capsule_length
+    let camera = commands
+        .spawn((
+            Camera3dBundle {
+                camera: Camera {
+                    hdr: true,
+                    ..default()
+                },
+                transform: Transform::from_xyz(0.0, camera_height, 0.5)
+                    .looking_at(Vec3::new(1.0, camera_height, 0.0), Vec3::Y),
+                tonemapping: Tonemapping::TonyMcMapface,
                 ..default()
             },
-            transform: Transform::from_xyz(0.0, player_height, 0.5)
-                .looking_at(Vec3::new(1.0, player_height, 0.0), Vec3::Y),
-            tonemapping: Tonemapping::TonyMcMapface,
-            ..default()
-        },
-        BloomSettings::default(),
-    ));
+            BloomSettings::default(),
+        ))
+        .id();
+    let player_capsule = commands
+        .spawn((
+            RigidBody::KinematicPositionBased,
+            Collider::capsule(
+                Vec3::new(0.0, 0.0, 0.0),
+                Vec3::new(0.0, capsule_length, 0.0),
+                capsule_radius,
+            ),
+            TransformBundle::from(Transform::from_xyz(0.0, capsule_radius, 0.0)),
+        ))
+        .id();
+    commands.entity(player_capsule).push_children(&[camera]);
+}
+
+fn setup_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
     let scene = asset_server.load(GLTF_SCENE);
     commands.spawn(SceneBundle { scene, ..default() });
 }
@@ -93,7 +114,7 @@ fn did_scene_load(asset_server: Res<AssetServer>) -> bool {
     asset_server.get_load_state(handle) == LoadState::Loaded
 }
 
-fn fix_lighting(
+fn fix_scene_lighting(
     mut commands: Commands,
     mut query: Query<(&Name, &mut PointLight)>,
     other_query: Query<(Entity, &Name), Without<NotShadowCaster>>,
