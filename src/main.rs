@@ -54,6 +54,7 @@ fn main() {
                 fix_scene_emissive_materials,
                 fix_scene_point_lights,
                 fix_scene_torches,
+                fix_scene_physics,
             )
                 .distributive_run_if(did_scene_load)
                 .distributive_run_if(run_once()),
@@ -100,6 +101,18 @@ fn setup_physics(mut commands: Commands) {
 fn did_scene_load(asset_server: Res<AssetServer>) -> bool {
     let handle = asset_server.get_handle_untyped(GLTF_SCENE);
     asset_server.get_load_state(handle) == LoadState::Loaded
+}
+
+fn fix_scene_physics(mut query: Query<(&Name, &mut Visibility), With<Transform>>) {
+    let mut count = 0;
+    for (name, mut visibility) in &mut query {
+        if name.ends_with("-colonly") {
+            count += 1;
+            *visibility = Visibility::Hidden;
+        }
+    }
+
+    info!("Hid {} collision-only meshes.", count);
 }
 
 fn fix_scene_point_lights(mut query: Query<&mut PointLight>) {
