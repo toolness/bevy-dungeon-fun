@@ -1,4 +1,4 @@
-use std::f32::consts::{E, FRAC_PI_2};
+use std::f32::consts::FRAC_PI_2;
 
 use bevy::{
     core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping},
