@@ -12,6 +12,9 @@ use bevy_rapier3d::prelude::*;
 /// Player speed in meters per second.
 const PLAYER_SPEED: f32 = 5.0;
 
+/// Gravity speed in meters per second.
+const GRAVITY_SPEED: f32 = 5.0;
+
 /// The distance of the camera from the bottom of the player's capsule.
 const CAMERA_HEIGHT: f32 = 1.0;
 
@@ -99,7 +102,8 @@ fn player_movement(
 
         velocity = velocity.normalize_or_zero();
 
-        let desired_translation = velocity * time.delta_seconds() * PLAYER_SPEED;
+        let gravity = Vec3::NEG_Y * GRAVITY_SPEED * time.delta_seconds();
+        let desired_translation = velocity * time.delta_seconds() * PLAYER_SPEED + gravity;
 
         controller.translation = Some(desired_translation);
     }
