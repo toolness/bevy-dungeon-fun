@@ -1,6 +1,8 @@
+mod app_state;
 mod dungeon_scene;
 mod player;
 
+use app_state::AppState;
 use bevy::{input::keyboard, pbr::PointLightShadowMap, prelude::*, window::WindowMode};
 use bevy_rapier3d::prelude::*;
 use dungeon_scene::DungeonScenePlugin;
@@ -20,6 +22,7 @@ fn main() {
         alpha: 1.0,
     };
     App::new()
+        .add_state::<AppState>()
         .insert_resource(AmbientLight {
             color: blueish,
             brightness: 5.0 / 5.0f32,

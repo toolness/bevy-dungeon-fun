@@ -1,9 +1,12 @@
 use bevy::{pbr::NotShadowCaster, prelude::*, scene::SceneInstance};
 use bevy_rapier3d::prelude::*;
 
+use crate::app_state::AppState;
+
 const GLTF_SCENE: &str = "dungeon.gltf#Scene0";
 
-fn setup_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn load_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
+    info!("Loading scene...");
     let scene = asset_server.load(GLTF_SCENE);
     commands
         .spawn(SceneBundle { scene, ..default() })
@@ -17,28 +20,41 @@ pub struct DungeonScenePlugin;
 
 impl Plugin for DungeonScenePlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_scene).add_systems(
-            (
-                // We can't use distributive_run_if because it raises weird trait errors, so
-                // we'll have to use run_if conditionally here.
-                //
-                // We also need to use apply_system_buffers here: just because the scene loaded
-                // doesn't mean that any commands it queued have been run yet.
-                apply_system_buffers.run_if(did_scene_load.and_then(run_once())),
-                // Now we can fix up our scene.
-                fix_scene_emissive_materials.run_if(did_scene_load.and_then(run_once())),
-                fix_scene_point_lights.run_if(did_scene_load.and_then(run_once())),
-                fix_scene_torches.run_if(did_scene_load.and_then(run_once())),
-                fix_scene_physics.run_if(did_scene_load.and_then(run_once())),
-            )
-                .chain(),
-        );
+        app.add_startup_system(load_scene)
+            .add_system(wait_for_scene_to_load.in_set(OnUpdate(AppState::LoadingAssets)))
+            .add_systems(
+                (
+                    // We also need to use apply_system_buffers here: just because the scene loaded
+                    // doesn't mean that any commands it queued have been run yet.
+                    // apply_system_buffers,
+                    // Now we can fix up our scene.
+                    // TODO REMOVE THE ABOVE
+                    fix_scene_emissive_materials,
+                    fix_scene_point_lights,
+                    fix_scene_torches,
+                    fix_scene_physics,
+                    start_game,
+                )
+                    .chain()
+                    .in_schedule(OnEnter(AppState::SettingUpScene)),
+            );
     }
 }
 
+fn start_game(mut next_state: ResMut<NextState<AppState>>) {
+    info!("Finished setting up scene! Starting game...");
+    next_state.set(AppState::InGame);
+}
+
 // Our SceneBundle has loaded once SceneInstance has been added to it.
-fn did_scene_load(query: Query<&DungeonScene, With<SceneInstance>>) -> bool {
-    return !query.is_empty();
+fn wait_for_scene_to_load(
+    query: Query<&DungeonScene, With<SceneInstance>>,
+    mut next_state: ResMut<NextState<AppState>>,
+) {
+    if !query.is_empty() {
+        info!("Scene is loaded! Setting it up...");
+        next_state.set(AppState::SettingUpScene);
+    }
 }
 
 fn fix_scene_physics(

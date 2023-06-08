@@ -9,6 +9,8 @@ use bevy::{
 };
 use bevy_rapier3d::prelude::*;
 
+use crate::app_state::AppState;
+
 /// Player speed in meters per second.
 const PLAYER_SPEED: f32 = 5.0;
 
@@ -151,9 +153,8 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<MouseMotionState>()
-            .add_startup_system(setup_player)
+            .add_system(setup_player.in_schedule(OnEnter(AppState::SettingUpScene)))
             .add_startup_system(grab_cursor)
-            .add_system(player_movement)
-            .add_system(player_look);
+            .add_systems((player_movement, player_look).in_set(OnUpdate(AppState::InGame)));
     }
 }
