@@ -1,38 +1,43 @@
-use bevy::{pbr::NotShadowCaster, prelude::*};
+use bevy::{pbr::NotShadowCaster, prelude::*, scene::SceneInstance};
 use bevy_rapier3d::prelude::*;
 
 const GLTF_SCENE: &str = "dungeon.gltf#Scene0";
 
 fn setup_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
     let scene = asset_server.load(GLTF_SCENE);
-    commands.spawn(SceneBundle { scene, ..default() });
+    commands
+        .spawn(SceneBundle { scene, ..default() })
+        .insert(DungeonScene);
 }
+
+#[derive(Component)]
+struct DungeonScene;
 
 pub struct DungeonScenePlugin;
 
 impl Plugin for DungeonScenePlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_scene).add_systems((
-            // We can't use distributive_run_if because it raises weird trait errors, so
-            // we'll have to use run_if conditionally here.
-            fix_scene_emissive_materials.run_if(did_scene_load.and_then(run_once())),
-            fix_scene_point_lights.run_if(did_scene_load.and_then(run_once())),
-            fix_scene_torches.run_if(did_scene_load.and_then(run_once())),
-            fix_scene_physics.run_if(did_scene_load.and_then(run_once())),
-        ));
+        app.add_startup_system(setup_scene).add_systems(
+            (
+                // We can't use distributive_run_if because it raises weird trait errors, so
+                // we'll have to use run_if conditionally here.
+                //
+                // We also need to use apply_system_buffers here: just because the scene loaded
+                // doesn't mean that any commands it queued have been run yet.
+                apply_system_buffers.run_if(did_scene_load.and_then(run_once())),
+                // Now we can fix up our scene.
+                fix_scene_emissive_materials.run_if(did_scene_load.and_then(run_once())),
+                fix_scene_point_lights.run_if(did_scene_load.and_then(run_once())),
+                fix_scene_torches.run_if(did_scene_load.and_then(run_once())),
+                fix_scene_physics.run_if(did_scene_load.and_then(run_once())),
+            )
+                .chain(),
+        );
     }
 }
 
-/// We used to do this by querying the asset server to see if our
-/// glTF had loaded yet, but this wasn't always accurate, I think
-/// because the asset loader likely enqueued commands that still
-/// needed to run before this system was called, or something
-/// bizarre.
-///
-/// In any case, we know there are point lights in our scene that
-/// aren't in the world at initialization, so we'll just wait
-/// for some lights to exist.
-fn did_scene_load(query: Query<Entity, With<PointLight>>) -> bool {
+// Our SceneBundle has loaded once SceneInstance has been added to it.
+fn did_scene_load(query: Query<&DungeonScene, With<SceneInstance>>) -> bool {
     return !query.is_empty();
 }
 
