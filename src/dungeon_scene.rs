@@ -103,7 +103,10 @@ fn fix_scene_physics(
                 );
                 continue;
             };
-            commands.entity(entity).insert(collider);
+            commands
+                .entity(entity)
+                .insert(collider)
+                .insert(RigidBody::Fixed);
         } else if name.ends_with("-rigid") {
             rigid_count += 1;
             let mut aabb = Aabb::default();
