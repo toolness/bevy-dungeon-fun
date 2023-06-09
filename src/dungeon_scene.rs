@@ -1,4 +1,4 @@
-use bevy::{pbr::NotShadowCaster, prelude::*, scene::SceneInstance};
+use bevy::{pbr::NotShadowCaster, prelude::*, render::primitives::Aabb, scene::SceneInstance};
 use bevy_rapier3d::prelude::*;
 
 use crate::app_state::AppState;
@@ -58,11 +58,12 @@ fn fix_scene_physics(
     child_meshes_query: Query<(&Name, &Handle<Mesh>)>,
     meshes: Res<Assets<Mesh>>,
 ) {
-    let mut count = 0;
+    let mut colonly_count = 0;
+    let mut rigid_count = 0;
     info!("Iterating over {} meshes.", query.iter().count());
     for (entity, name, mut visibility, children) in &mut query {
         if name.ends_with("-colonly") {
-            count += 1;
+            colonly_count += 1;
             *visibility = Visibility::Hidden;
             let Some(child) = children.first() else {
                 warn!(
@@ -103,10 +104,68 @@ fn fix_scene_physics(
                 continue;
             };
             commands.entity(entity).insert(collider);
+        } else if name.ends_with("-rigid") {
+            rigid_count += 1;
+            let mut aabb = Aabb::default();
+            for child in children.iter() {
+                let Ok((child_name, mesh_handle)) = child_meshes_query.get(*child) else {
+                    warn!(
+                        "rigid object {} child has no mesh.",
+                        name,
+                    );
+                    continue;
+                };
+                let Some(mesh) = meshes.get(mesh_handle) else {
+                    warn!(
+                        "rigid object {} mesh {} not loaded.",
+                        name,
+                        child_name
+                    );
+                    continue;
+                };
+                // This isn't very efficient, as we're recomputing it for every single instance
+                // of every single mesh. We don't have many mehes in our scene so it's not that
+                // big a deal, though.
+                let Some(mesh_aabb) = mesh.compute_aabb() else {
+                    warn!(
+                        "rigid object {} mesh {} has no AABB.",
+                        name,
+                        child_name
+                    );
+                    continue;
+                };
+                aabb = union_aabb(&aabb, &mesh_aabb);
+            }
+            // This makes assumptions about the AABB, namely that the object is symmetrical around
+            // its origin. Fortunately, this is actually the case for our barrels and crates.
+            let collider = if name.contains("Barrel") {
+                // It's a barrel.
+                Collider::cylinder(aabb.half_extents.y, aabb.half_extents.x)
+            } else {
+                // It's a crate.
+                Collider::cuboid(
+                    aabb.half_extents.x,
+                    aabb.half_extents.y,
+                    aabb.half_extents.z,
+                )
+            };
+            commands
+                .entity(entity)
+                .insert(RigidBody::Dynamic)
+                .insert(collider);
         }
     }
 
-    info!("Converted {} collision-only meshes.", count);
+    info!(
+        "Converted {} collision-only meshes and added {} rigid body colliders.",
+        colonly_count, rigid_count
+    );
+}
+
+fn union_aabb(a: &Aabb, b: &Aabb) -> Aabb {
+    let min = a.min().min(b.min());
+    let max = a.max().max(b.max());
+    Aabb::from_min_max(min.into(), max.into())
 }
 
 fn fix_scene_point_lights(mut query: Query<&mut PointLight>) {
