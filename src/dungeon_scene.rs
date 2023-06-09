@@ -5,9 +5,17 @@ use crate::app_state::AppState;
 
 const GLTF_SCENE: &str = "dungeon.gltf#Scene0";
 
-fn load_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
+#[derive(Resource, Default)]
+struct AssetsLoading(Vec<HandleUntyped>);
+
+fn load_scene(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut loading: ResMut<AssetsLoading>,
+) {
     info!("Loading scene...");
     let scene = asset_server.load(GLTF_SCENE);
+    loading.0.push(scene.clone_untyped());
     commands
         .spawn(SceneBundle { scene, ..default() })
         .insert(DungeonScene);
@@ -21,6 +29,7 @@ pub struct DungeonScenePlugin;
 impl Plugin for DungeonScenePlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(load_scene)
+            .init_resource::<AssetsLoading>()
             .add_system(wait_for_scene_to_load.in_set(OnUpdate(AppState::LoadingAssets)))
             .add_systems(
                 (
@@ -42,13 +51,34 @@ fn start_game(mut next_state: ResMut<NextState<AppState>>) {
 }
 
 // Our SceneBundle has loaded once SceneInstance has been added to it.
+// But also, we need to wait for our resources to load too, which will
+// take longer to load on Web.
+//
+// Aside: This is really really confusing and I have spent literally
+// half this project just trying to figure out how to *reliably*
+// wait for the level to load so I can start modifying it.
 fn wait_for_scene_to_load(
-    query: Query<&DungeonScene, With<SceneInstance>>,
+    scene_query: Query<&DungeonScene, With<SceneInstance>>,
+    server: Res<AssetServer>,
+    loading: Res<AssetsLoading>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
-    if !query.is_empty() {
-        info!("Scene is loaded! Setting it up...");
-        next_state.set(AppState::SettingUpScene);
+    use bevy::asset::LoadState;
+
+    if !scene_query.is_empty() {
+        match server.get_group_load_state(loading.0.iter().map(|handle| handle.id())) {
+            LoadState::Loaded => {
+                info!("Scene is loaded! Setting it up...");
+                next_state.set(AppState::SettingUpScene);
+            }
+            LoadState::Failed => {
+                error!("Scene failed to load!");
+            }
+            LoadState::Loading => {
+                info!("Scene is still loading...");
+            }
+            _ => {}
+        }
     }
 }
 
