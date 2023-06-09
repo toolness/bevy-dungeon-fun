@@ -42,3 +42,11 @@ Then you can either:
 ## License
 
 Everything in this repository, including the Rust code and the Blender project, is licensed under [CC0 1.0 Universal](./LICENSE.md) (public domain).
+
+## Credits
+
+Portions of the first-person-controller code were taken from [bevy_flycam](https://github.com/sburris0/bevy_flycam).
+
+Some snippets were provided by GitHub Copilot.
+
+The rest of the Rust code, and the entire Blender scene, are by Atul Varma.
