@@ -1,4 +1,4 @@
-use bevy::{pbr::NotShadowCaster, prelude::*, render::primitives::Aabb, scene::SceneInstance};
+use bevy::{pbr::NotShadowCaster, prelude::*, render::primitives::Aabb};
 use bevy_rapier3d::prelude::*;
 
 use crate::app_state::AppState;
@@ -50,35 +50,25 @@ fn start_game(mut next_state: ResMut<NextState<AppState>>) {
     next_state.set(AppState::InGame);
 }
 
-// Our SceneBundle has loaded once SceneInstance has been added to it.
-// But also, we need to wait for our resources to load too, which will
-// take longer to load on Web.
-//
-// Aside: This is really really confusing and I have spent literally
-// half this project just trying to figure out how to *reliably*
-// wait for the level to load so I can start modifying it.
 fn wait_for_scene_to_load(
-    scene_query: Query<&DungeonScene, With<SceneInstance>>,
     server: Res<AssetServer>,
     loading: Res<AssetsLoading>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
     use bevy::asset::LoadState;
 
-    if !scene_query.is_empty() {
-        match server.get_group_load_state(loading.0.iter().map(|handle| handle.id())) {
-            LoadState::Loaded => {
-                info!("Scene is loaded! Setting it up...");
-                next_state.set(AppState::SettingUpScene);
-            }
-            LoadState::Failed => {
-                error!("Scene failed to load!");
-            }
-            LoadState::Loading => {
-                info!("Scene is still loading...");
-            }
-            _ => {}
+    match server.get_group_load_state(loading.0.iter().map(|handle| handle.id())) {
+        LoadState::Loaded => {
+            info!("Scene is loaded! Setting it up...");
+            next_state.set(AppState::SettingUpScene);
         }
+        LoadState::Failed => {
+            error!("Scene failed to load!");
+        }
+        LoadState::Loading => {
+            info!("Scene is still loading...");
+        }
+        _ => {}
     }
 }
 
