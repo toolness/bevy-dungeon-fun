@@ -24,11 +24,6 @@ impl Plugin for DungeonScenePlugin {
             .add_system(wait_for_scene_to_load.in_set(OnUpdate(AppState::LoadingAssets)))
             .add_systems(
                 (
-                    // We also need to use apply_system_buffers here: just because the scene loaded
-                    // doesn't mean that any commands it queued have been run yet.
-                    // apply_system_buffers,
-                    // Now we can fix up our scene.
-                    // TODO REMOVE THE ABOVE
                     fix_scene_emissive_materials,
                     fix_scene_point_lights,
                     fix_scene_torches,
