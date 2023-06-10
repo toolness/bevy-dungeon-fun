@@ -1,12 +1,9 @@
 use bevy::{pbr::NotShadowCaster, prelude::*, render::primitives::Aabb};
 use bevy_rapier3d::prelude::*;
 
-use crate::app_state::AppState;
+use crate::app_state::{start_game, AppState, AssetsLoading};
 
 const GLTF_SCENE: &str = "dungeon.gltf#Scene0";
-
-#[derive(Resource, Default)]
-struct AssetsLoading(Vec<HandleUntyped>);
 
 fn load_scene(
     mut commands: Commands,
@@ -38,11 +35,6 @@ impl Plugin for DungeonScenePlugin {
                     .in_schedule(OnEnter(AppState::SettingUpScene)),
             );
     }
-}
-
-fn start_game(mut next_state: ResMut<NextState<AppState>>) {
-    info!("Finished setting up scene! Starting game...");
-    next_state.set(AppState::InGame);
 }
 
 fn wait_for_scene_to_load(

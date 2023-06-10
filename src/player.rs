@@ -8,24 +8,10 @@ use bevy::{
 };
 use bevy_rapier3d::prelude::*;
 
-use crate::app_state::AppState;
-
-/// Player speed in meters per second.
-const PLAYER_SPEED: f32 = 5.0;
+use crate::{app_state::AppState, config::Config};
 
 /// Gravity speed in meters per second.
 const GRAVITY_SPEED: f32 = 5.0;
-
-/// The distance of the camera from the bottom of the player's capsule.
-const CAMERA_HEIGHT: f32 = 1.0;
-
-/// The radius of the player's capsule.
-const CAPSULE_RADIUS: f32 = 0.5;
-
-/// The height of the cylindrical part of the player's capsule.
-const CAPSULE_CYLINDER_HEIGHT: f32 = 1.0;
-
-const MOUSE_SENSITIVITY: f32 = 0.00012;
 
 const MAX_PITCH: f32 = FRAC_PI_2 - 0.01;
 
@@ -34,7 +20,7 @@ pub struct Player;
 
 pub struct PlayerMovement;
 
-fn setup_player(mut commands: Commands) {
+fn setup_player(mut commands: Commands, config: Res<Config>) {
     let camera = commands
         .spawn((
             Camera3dBundle {
@@ -42,8 +28,8 @@ fn setup_player(mut commands: Commands) {
                     hdr: true,
                     ..default()
                 },
-                transform: Transform::from_xyz(0.0, CAMERA_HEIGHT, 0.0)
-                    .looking_at(Vec3::new(1.0, CAMERA_HEIGHT, 0.0), Vec3::Y),
+                transform: Transform::from_xyz(0.0, config.player_camera_height, 0.0)
+                    .looking_at(Vec3::new(1.0, config.player_camera_height, 0.0), Vec3::Y),
                 tonemapping: Tonemapping::TonyMcMapface,
                 ..default()
             },
@@ -55,10 +41,10 @@ fn setup_player(mut commands: Commands) {
             RigidBody::KinematicPositionBased,
             Collider::capsule(
                 Vec3::new(0.0, 0.0, 0.0),
-                Vec3::new(0.0, CAPSULE_CYLINDER_HEIGHT, 0.0),
-                CAPSULE_RADIUS,
+                Vec3::new(0.0, config.player_capsule_cylinder_height, 0.0),
+                config.player_capsule_radius,
             ),
-            TransformBundle::from(Transform::from_xyz(0.0, CAPSULE_RADIUS, 0.0)),
+            TransformBundle::from(Transform::from_xyz(0.0, config.player_capsule_radius, 0.0)),
             KinematicCharacterController {
                 up: Vec3::Y,
                 ..default()
@@ -75,6 +61,7 @@ fn player_movement(
     mut controller_query: Query<&mut KinematicCharacterController>,
     camera_query: Query<(&Parent, &Transform), With<Camera>>,
     mut player_movement: EventWriter<PlayerMovement>,
+    config: Res<Config>,
 ) {
     for (parent, transform) in &camera_query {
         let Ok(mut controller) = controller_query.get_mut(parent.get()) else {
@@ -112,7 +99,7 @@ fn player_movement(
         }
 
         let gravity = Vec3::NEG_Y * GRAVITY_SPEED * time.delta_seconds();
-        let desired_translation = velocity * time.delta_seconds() * PLAYER_SPEED + gravity;
+        let desired_translation = velocity * time.delta_seconds() * config.player_speed + gravity;
 
         controller.translation = Some(desired_translation);
     }
@@ -122,6 +109,7 @@ fn player_look(
     primary_window: Query<&mut Window, With<PrimaryWindow>>,
     mut motion_events: EventReader<MouseMotion>,
     mut query: Query<&mut Transform, With<Camera3d>>,
+    config: Res<Config>,
 ) {
     let Ok(window) = primary_window.get_single() else {
         warn!("No primary window when trying to mouselook!");
@@ -133,8 +121,8 @@ fn player_look(
             let (mut yaw, mut pitch, _) = transform.rotation.to_euler(EulerRot::YXZ);
             // Using smallest of height or width ensures equal vertical and horizontal sensitivity.
             let window_scale = window.height().min(window.width());
-            pitch -= (MOUSE_SENSITIVITY * event.delta.y * window_scale).to_radians();
-            yaw -= (MOUSE_SENSITIVITY * event.delta.x * window_scale).to_radians();
+            pitch -= (config.mouse_sensitivity * event.delta.y * window_scale).to_radians();
+            yaw -= (config.mouse_sensitivity * event.delta.x * window_scale).to_radians();
 
             pitch = pitch.clamp(-MAX_PITCH, MAX_PITCH);
 

@@ -1,0 +1,7 @@
+{
+    "player_speed": 5.0,
+    "player_camera_height": 1.0,
+    "player_capsule_radius": 0.5,
+    "player_capsule_cylinder_height": 1.0,
+    "mouse_sensitivity": 0.00012
+}
