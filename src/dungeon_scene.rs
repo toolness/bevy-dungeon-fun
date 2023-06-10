@@ -16,13 +16,8 @@ fn load_scene(
     info!("Loading scene...");
     let scene = asset_server.load(GLTF_SCENE);
     loading.0.push(scene.clone_untyped());
-    commands
-        .spawn(SceneBundle { scene, ..default() })
-        .insert(DungeonScene);
+    commands.spawn(SceneBundle { scene, ..default() })
 }
-
-#[derive(Component)]
-struct DungeonScene;
 
 pub struct DungeonScenePlugin;
 
