@@ -220,10 +220,6 @@ fn fix_scene_emissive_materials(
         let [r, g, b, _a] = mat.emissive.as_linear_rgba_f32();
         let scale = config.emissive_scale;
         if r > 0.0 || g > 0.0 || b > 0.0 {
-            // Bring the color into HDR space so bevy applies bloom to it.
-            //
-            // TODO: We should probably grab the material by name, rather than scaling
-            // every single emissive material.
             info!(
                 "Scaling emissive {:?} by a factor of {}.",
                 mat.emissive, scale
