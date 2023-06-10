@@ -69,7 +69,7 @@ fn fix_scene_physics(
     let mut rigid_count = 0;
     info!("Iterating over {} meshes.", query.iter().count());
     for (entity, name, mut visibility, children) in &mut query {
-        if name.ends_with("-colonly") {
+        if name.contains("-colonly") {
             colonly_count += 1;
             *visibility = Visibility::Hidden;
             let Some(child) = children.first() else {
@@ -114,7 +114,7 @@ fn fix_scene_physics(
                 .entity(entity)
                 .insert(collider)
                 .insert(RigidBody::Fixed);
-        } else if name.ends_with("-rigid") {
+        } else if name.contains("-rigid") {
             rigid_count += 1;
             let mut aabb = Aabb::default();
             for child in children.iter() {
