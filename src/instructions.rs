@@ -10,13 +10,6 @@ fn instructions(mut commands: Commands, asset_server: Res<AssetServer>) {
         font_size: 30.0,
         color: Color::WHITE,
     };
-    commands.spawn(Camera2dBundle {
-        camera: Camera {
-            order: -1,
-            ..Default::default()
-        },
-        ..Default::default()
-    });
     commands.spawn((
         TextBundle::from_section("Use WASD to move and mouse to look.", text_style)
             .with_text_alignment(TextAlignment::Left)
