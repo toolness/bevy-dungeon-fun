@@ -1,7 +1,10 @@
 use bevy::{pbr::NotShadowCaster, prelude::*, render::primitives::Aabb};
 use bevy_rapier3d::prelude::*;
 
-use crate::app_state::{start_game, AppState, AssetsLoading};
+use crate::{
+    app_state::{start_game, AppState, AssetsLoading},
+    config::Config,
+};
 
 const GLTF_SCENE: &str = "dungeon.gltf#Scene0";
 
@@ -209,10 +212,13 @@ fn fix_scene_torches(
     info!("Disabled shadows for {} torches.", count);
 }
 
-fn fix_scene_emissive_materials(mut materials: ResMut<Assets<StandardMaterial>>) {
+fn fix_scene_emissive_materials(
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    config: Res<Config>,
+) {
     for (_handle, mat) in materials.iter_mut() {
         let [r, g, b, _a] = mat.emissive.as_linear_rgba_f32();
-        let scale: f32 = 10.0;
+        let scale = config.emissive_scale;
         if r > 0.0 || g > 0.0 || b > 0.0 {
             // Bring the color into HDR space so bevy applies bloom to it.
             //

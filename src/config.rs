@@ -15,6 +15,10 @@ pub struct Config {
     /// The height of the cylindrical part of the player's capsule.
     pub player_capsule_cylinder_height: f32,
     pub mouse_sensitivity: f32,
+    /// Multiply the colors of all emissive materials by this amount.
+    /// This will put the colors into the HDR space so bevy can apply
+    /// bloom to it, etc.
+    pub emissive_scale: f32,
 }
 
 fn load_config(asset_server: ResMut<AssetServer>, mut loading: ResMut<AssetsLoading>) {
