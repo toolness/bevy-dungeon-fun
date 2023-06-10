@@ -29,6 +29,11 @@ const MOUSE_SENSITIVITY: f32 = 0.00012;
 
 const MAX_PITCH: f32 = FRAC_PI_2 - 0.01;
 
+#[derive(Component)]
+pub struct Player;
+
+pub struct PlayerMovement;
+
 fn setup_player(mut commands: Commands) {
     let camera = commands
         .spawn((
@@ -58,6 +63,7 @@ fn setup_player(mut commands: Commands) {
                 up: Vec3::Y,
                 ..default()
             },
+            Player,
         ))
         .id();
     commands.entity(player_capsule).push_children(&[camera]);
@@ -68,6 +74,7 @@ fn player_movement(
     keys: Res<Input<KeyCode>>,
     mut controller_query: Query<&mut KinematicCharacterController>,
     camera_query: Query<(&Parent, &Transform), With<Camera>>,
+    mut player_movement: EventWriter<PlayerMovement>,
 ) {
     for (parent, transform) in &camera_query {
         let Ok(mut controller) = controller_query.get_mut(parent.get()) else {
@@ -99,6 +106,10 @@ fn player_movement(
         }
 
         velocity = velocity.normalize_or_zero();
+
+        if velocity != Vec3::ZERO {
+            player_movement.send(PlayerMovement);
+        }
 
         let gravity = Vec3::NEG_Y * GRAVITY_SPEED * time.delta_seconds();
         let desired_translation = velocity * time.delta_seconds() * PLAYER_SPEED + gravity;
@@ -149,6 +160,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_system(setup_player.in_schedule(OnEnter(AppState::SettingUpScene)))
             .add_startup_system(grab_cursor)
-            .add_systems((player_movement, player_look).in_set(OnUpdate(AppState::InGame)));
+            .add_systems((player_movement, player_look).in_set(OnUpdate(AppState::InGame)))
+            .add_event::<PlayerMovement>();
     }
 }
