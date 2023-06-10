@@ -2,7 +2,6 @@ use std::f32::consts::FRAC_PI_2;
 
 use bevy::{
     core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping},
-    ecs::event::ManualEventReader,
     input::mouse::MouseMotion,
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
@@ -29,9 +28,6 @@ const CAPSULE_CYLINDER_HEIGHT: f32 = 1.0;
 const MOUSE_SENSITIVITY: f32 = 0.00012;
 
 const MAX_PITCH: f32 = FRAC_PI_2 - 0.01;
-
-#[derive(Resource, Default)]
-struct MouseMotionState(ManualEventReader<MouseMotion>);
 
 fn setup_player(mut commands: Commands) {
     let camera = commands
@@ -113,8 +109,7 @@ fn player_movement(
 
 fn player_look(
     primary_window: Query<&mut Window, With<PrimaryWindow>>,
-    mut mouse_motion: ResMut<MouseMotionState>,
-    motion_events: Res<Events<MouseMotion>>,
+    mut motion_events: EventReader<MouseMotion>,
     mut query: Query<&mut Transform, With<Camera3d>>,
 ) {
     let Ok(window) = primary_window.get_single() else {
@@ -122,7 +117,7 @@ fn player_look(
         return;
     };
     for mut transform in &mut query {
-        for event in mouse_motion.0.iter(&motion_events) {
+        for event in motion_events.iter() {
             // This is mostly taken from bevy_flycam's mouselook code.
             let (mut yaw, mut pitch, _) = transform.rotation.to_euler(EulerRot::YXZ);
             // Using smallest of height or width ensures equal vertical and horizontal sensitivity.
@@ -152,8 +147,7 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<MouseMotionState>()
-            .add_system(setup_player.in_schedule(OnEnter(AppState::SettingUpScene)))
+        app.add_system(setup_player.in_schedule(OnEnter(AppState::SettingUpScene)))
             .add_startup_system(grab_cursor)
             .add_systems((player_movement, player_look).in_set(OnUpdate(AppState::InGame)));
     }
