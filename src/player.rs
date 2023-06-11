@@ -26,6 +26,11 @@ fn player_spawn_transform(config: &Config) -> Transform {
     Transform::from_translation(position)
 }
 
+fn player_camera_spawn_transform(config: &Config) -> Transform {
+    Transform::from_xyz(0.0, config.player_camera_height, 0.0)
+        .looking_at(Vec3::new(1.0, config.player_camera_height, 0.0), Vec3::Y)
+}
+
 fn setup_player(mut commands: Commands, config: Res<Config>) {
     let camera = commands
         .spawn((
@@ -34,8 +39,7 @@ fn setup_player(mut commands: Commands, config: Res<Config>) {
                     hdr: true,
                     ..default()
                 },
-                transform: Transform::from_xyz(0.0, config.player_camera_height, 0.0)
-                    .looking_at(Vec3::new(1.0, config.player_camera_height, 0.0), Vec3::Y),
+                transform: player_camera_spawn_transform(&config),
                 tonemapping: Tonemapping::TonyMcMapface,
                 ..default()
             },
@@ -158,15 +162,25 @@ fn player_look(
     }
 }
 
-fn maybe_respawn_player(mut query: Query<(&mut Player, &mut Transform)>, config: Res<Config>) {
-    for (mut player, mut transform) in query.iter_mut() {
-        if transform.translation.y < config.fall_off_level_y {
+fn maybe_respawn_player(
+    mut player_query: Query<(&mut Player, &mut Transform), Without<Camera>>,
+    mut camera_query: Query<(&Parent, &mut Transform), With<Camera>>,
+    config: Res<Config>,
+) {
+    for (parent, mut camera_transform) in &mut camera_query {
+        let Ok((mut player, mut player_transform)) = player_query.get_mut(parent.get()) else {
+            warn!("Parent of camera has no kinematic character controller!");
+            continue;
+        };
+
+        if player_transform.translation.y < config.fall_off_level_y {
             // Really we are teleporting the player back to their spawn position,
             // rather than respawning them. Also, this could run into weird edge
             // cases, e.g. if the player pushed a crate over their spawn position,
             // but this is better than dooming the player to an infinite fall.
             *player = default();
-            *transform = player_spawn_transform(&config);
+            *player_transform = player_spawn_transform(&config);
+            *camera_transform = player_camera_spawn_transform(&config);
         }
     }
 }
