@@ -3,7 +3,7 @@ use bevy_common_assets::json::JsonAssetPlugin;
 
 use crate::app_state::{AppState, AssetsLoading};
 
-#[derive(serde::Deserialize, bevy::reflect::TypeUuid, Resource, Default, Copy, Clone)]
+#[derive(serde::Deserialize, bevy::reflect::TypeUuid, Resource, Default, Clone)]
 #[uuid = "83187ffe-c216-4626-803f-e2a96e016323"]
 pub struct Config {
     /// Player speed in meters per second.
@@ -29,6 +29,8 @@ pub struct Config {
     /// If the player falls off the level, this will be their y-coordinate
     /// when they're respawned.
     pub spawn_position: Vec3,
+    /// Instructions shown at beginning of game.
+    pub instructions: String,
 }
 
 fn load_config(asset_server: ResMut<AssetServer>, mut loading: ResMut<AssetsLoading>) {
@@ -39,7 +41,10 @@ fn load_config(asset_server: ResMut<AssetServer>, mut loading: ResMut<AssetsLoad
 fn apply_config(mut config: ResMut<Config>, loaded_config: Res<Assets<Config>>) {
     for (_, loaded) in loaded_config.iter() {
         info!("Loaded configuration.");
-        *config = *loaded;
+        // Technically this means we are storing two copies of the configuration,
+        // but it's pretty small and much more convenient to access as a global
+        // resource than via an asset handle.
+        *config = loaded.clone();
         return;
     }
     error!("No configuration found!");

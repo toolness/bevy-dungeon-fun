@@ -1,19 +1,40 @@
 use bevy::prelude::*;
 
-use crate::player::PlayerMovement;
+use crate::{
+    app_state::{AppState, AssetsLoading},
+    config::Config,
+    player::PlayerMovement,
+};
 
 #[derive(Component)]
 struct InstructionText;
 
-fn show_instructions(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+#[derive(Resource)]
+struct Fonts {
+    fira_sans_bold: Handle<Font>,
+}
+
+fn load_fonts(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut loading: ResMut<AssetsLoading>,
+) {
+    let fonts = Fonts {
+        fira_sans_bold: asset_server.load("fonts/FiraSans-Bold.ttf"),
+    };
+    let mut untyped_fonts = vec![fonts.fira_sans_bold.clone_untyped()];
+    loading.0.append(&mut untyped_fonts);
+    commands.insert_resource(fonts);
+}
+
+fn show_instructions(mut commands: Commands, fonts: Res<Fonts>, config: Res<Config>) {
     let text_style = TextStyle {
-        font: font.clone(),
+        font: fonts.fira_sans_bold.clone(),
         font_size: 30.0,
         color: Color::WHITE,
     };
     commands.spawn((
-        TextBundle::from_section("Use WASD to move and mouse to look.", text_style)
+        TextBundle::from_section(config.instructions.clone(), text_style)
             .with_text_alignment(TextAlignment::Left)
             .with_style(Style {
                 position_type: PositionType::Absolute,
@@ -44,7 +65,8 @@ pub struct InstructionsPlugin;
 
 impl Plugin for InstructionsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(show_instructions)
-            .add_system(hide_instructions);
+        app.add_startup_system(load_fonts)
+            .add_system(show_instructions.in_schedule(OnEnter(AppState::InGame)))
+            .add_system(hide_instructions.in_set(OnUpdate(AppState::InGame)));
     }
 }
