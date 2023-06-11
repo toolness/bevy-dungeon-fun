@@ -1,4 +1,4 @@
-use bevy::{pbr::NotShadowCaster, prelude::*, render::primitives::Aabb};
+use bevy::{app::AppExit, pbr::NotShadowCaster, prelude::*, render::primitives::Aabb};
 use bevy_rapier3d::prelude::*;
 
 use crate::{
@@ -44,19 +44,18 @@ fn wait_for_scene_to_load(
     server: Res<AssetServer>,
     loading: Res<AssetsLoading>,
     mut next_state: ResMut<NextState<AppState>>,
+    mut exit: EventWriter<AppExit>,
 ) {
     use bevy::asset::LoadState;
 
     match server.get_group_load_state(loading.0.iter().map(|handle| handle.id())) {
         LoadState::Loaded => {
-            info!("Scene is loaded! Setting it up...");
+            info!("Resources loaded! Setting up scene...");
             next_state.set(AppState::SettingUpScene);
         }
         LoadState::Failed => {
-            error!("Scene failed to load!");
-        }
-        LoadState::Loading => {
-            info!("Scene is still loading...");
+            error!("At least one resource failed to load!");
+            exit.send(AppExit);
         }
         _ => {}
     }
