@@ -6,5 +6,7 @@
     "mouse_sensitivity": 0.00012,
     "emissive_scale": 10.0,
     "gravity": 9.8,
-    "jump_velocity": 5.0
+    "jump_velocity": 5.0,
+    "fall_off_level_y": -50.0,
+    "spawn_position": [0, 0, 0]
 }

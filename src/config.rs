@@ -23,6 +23,12 @@ pub struct Config {
     pub gravity: f32,
     /// Jump velocity in meters per second.
     pub jump_velocity: f32,
+    /// If the player's y-coordinate is below this value, they've fallen
+    /// off the level and should be respawned.
+    pub fall_off_level_y: f32,
+    /// If the player falls off the level, this will be their y-coordinate
+    /// when they're respawned.
+    pub spawn_position: Vec3,
 }
 
 fn load_config(asset_server: ResMut<AssetServer>, mut loading: ResMut<AssetsLoading>) {
