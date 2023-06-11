@@ -97,7 +97,31 @@
 				61,
 				62,
 				63,
-				64
+				64,
+				65,
+				66,
+				67,
+				68,
+				69,
+				70,
+				71,
+				72,
+				73,
+				74,
+				75,
+				76,
+				77,
+				78,
+				79,
+				80,
+				81,
+				82,
+				83,
+				84,
+				85,
+				86,
+				87,
+				88
 			]
 		}
 	],
@@ -941,6 +965,402 @@
 				0,
 				14
 			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				-6,
+				0.5,
+				-2
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.001",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				-6,
+				0.5,
+				2
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.002",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				-6,
+				0.5,
+				6
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.003",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				-6,
+				0.5,
+				-6
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.004",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				-2,
+				0.5,
+				-6
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.005",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				6,
+				0.5,
+				14
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.006",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				6,
+				0.5,
+				10
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.007",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				6,
+				0.5,
+				6
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.008",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				6,
+				0.5,
+				2
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.009",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				6,
+				0.5,
+				-2
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.010",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				2,
+				0.5,
+				14
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.011",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				2,
+				0.5,
+				10
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.012",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				-2,
+				0.5,
+				18
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.013",
+			"scale":[
+				0.7684900760650635,
+				1,
+				0.7684900760650635
+			],
+			"translation":[
+				10,
+				0.5,
+				18
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.014",
+			"rotation":[
+				0,
+				0.70710688829422,
+				0,
+				0.7071067094802856
+			],
+			"scale":[
+				0.768490195274353,
+				1,
+				0.768490195274353
+			],
+			"translation":[
+				10,
+				0.5,
+				18
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.015",
+			"rotation":[
+				0,
+				0.70710688829422,
+				0,
+				0.7071067094802856
+			],
+			"scale":[
+				0.768490195274353,
+				1,
+				0.768490195274353
+			],
+			"translation":[
+				6,
+				0.5,
+				18
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.016",
+			"rotation":[
+				0,
+				0.70710688829422,
+				0,
+				0.7071067094802856
+			],
+			"scale":[
+				0.768490195274353,
+				1,
+				0.768490195274353
+			],
+			"translation":[
+				2,
+				0.5,
+				18
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.017",
+			"rotation":[
+				0,
+				0.70710688829422,
+				0,
+				0.7071067094802856
+			],
+			"scale":[
+				0.768490195274353,
+				1,
+				0.768490195274353
+			],
+			"translation":[
+				2,
+				0.5,
+				14
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.018",
+			"rotation":[
+				0,
+				0.70710688829422,
+				0,
+				0.7071067094802856
+			],
+			"scale":[
+				0.768490195274353,
+				1,
+				0.768490195274353
+			],
+			"translation":[
+				10,
+				0.5,
+				14
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.019",
+			"rotation":[
+				0,
+				0.70710688829422,
+				0,
+				0.7071067094802856
+			],
+			"scale":[
+				0.768490195274353,
+				1,
+				0.768490195274353
+			],
+			"translation":[
+				2,
+				0.5,
+				6
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.020",
+			"rotation":[
+				0,
+				0.70710688829422,
+				0,
+				0.7071067094802856
+			],
+			"scale":[
+				0.768490195274353,
+				1,
+				0.768490195274353
+			],
+			"translation":[
+				-2,
+				0.5,
+				6
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.021",
+			"rotation":[
+				0,
+				0.70710688829422,
+				0,
+				0.7071067094802856
+			],
+			"scale":[
+				0.768490195274353,
+				1,
+				0.768490195274353
+			],
+			"translation":[
+				-2,
+				0.5,
+				-10
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.022",
+			"rotation":[
+				0,
+				0.70710688829422,
+				0,
+				0.7071067094802856
+			],
+			"scale":[
+				0.768490195274353,
+				1,
+				0.768490195274353
+			],
+			"translation":[
+				6,
+				0.5,
+				-6
+			]
+		},
+		{
+			"mesh":15,
+			"name":"WallCollider-colonly.023",
+			"rotation":[
+				0,
+				0.70710688829422,
+				0,
+				0.7071067094802856
+			],
+			"scale":[
+				0.768490195274353,
+				1,
+				0.768490195274353
+			],
+			"translation":[
+				2,
+				0.5,
+				-6
+			]
 		}
 	],
 	"materials":[
@@ -1378,6 +1798,19 @@
 						"NORMAL":103
 					},
 					"indices":104
+				}
+			]
+		},
+		{
+			"name":"Cube.019",
+			"primitives":[
+				{
+					"attributes":{
+						"POSITION":105,
+						"TEXCOORD_0":106,
+						"NORMAL":107
+					},
+					"indices":108
 				}
 			]
 		}
@@ -2218,10 +2651,10 @@
 		{
 			"bufferView":97,
 			"componentType":5126,
-			"count":72,
+			"count":16,
 			"max":[
 				14,
-				5,
+				2,
 				22
 			],
 			"min":[
@@ -2234,51 +2667,85 @@
 		{
 			"bufferView":98,
 			"componentType":5126,
-			"count":72,
+			"count":16,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":99,
 			"componentType":5126,
-			"count":72,
+			"count":16,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":100,
 			"componentType":5123,
-			"count":138,
+			"count":42,
 			"type":"SCALAR"
 		},
 		{
 			"bufferView":101,
 			"componentType":5126,
-			"count":48,
+			"count":76,
 			"max":[
 				4,
 				3,
-				0.10000002384185791
+				0.20000001788139343
 			],
 			"min":[
 				0,
 				0,
-				-0.10000002384185791
+				-0.20000001788139343
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":102,
 			"componentType":5126,
-			"count":48,
+			"count":76,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":103,
 			"componentType":5126,
-			"count":48,
+			"count":76,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":104,
+			"componentType":5123,
+			"count":156,
+			"type":"SCALAR"
+		},
+		{
+			"bufferView":105,
+			"componentType":5126,
+			"count":48,
+			"max":[
+				0.5,
+				2.5,
+				0.5
+			],
+			"min":[
+				-0.5,
+				-0.5,
+				-5.20501184463501
+			],
+			"type":"VEC3"
+		},
+		{
+			"bufferView":106,
+			"componentType":5126,
+			"count":48,
+			"type":"VEC2"
+		},
+		{
+			"bufferView":107,
+			"componentType":5126,
+			"count":48,
+			"type":"VEC3"
+		},
+		{
+			"bufferView":108,
 			"componentType":5123,
 			"count":72,
 			"type":"SCALAR"
@@ -2869,56 +3336,80 @@
 		},
 		{
 			"buffer":0,
-			"byteLength":864,
+			"byteLength":192,
 			"byteOffset":481552,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":576,
-			"byteOffset":482416,
+			"byteLength":128,
+			"byteOffset":481744,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":864,
-			"byteOffset":482992,
+			"byteLength":192,
+			"byteOffset":481872,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":276,
-			"byteOffset":483856,
+			"byteLength":84,
+			"byteOffset":482064,
+			"target":34963
+		},
+		{
+			"buffer":0,
+			"byteLength":912,
+			"byteOffset":482148,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":608,
+			"byteOffset":483060,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":912,
+			"byteOffset":483668,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":312,
+			"byteOffset":484580,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":576,
-			"byteOffset":484132,
+			"byteOffset":484892,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":384,
-			"byteOffset":484708,
+			"byteOffset":485468,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":576,
-			"byteOffset":485092,
+			"byteOffset":485852,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":144,
-			"byteOffset":485668,
+			"byteOffset":486428,
 			"target":34963
 		}
 	],
 	"buffers":[
 		{
-			"byteLength":485812,
+			"byteLength":486572,
 			"uri":"dungeon.bin"
 		}
 	]
