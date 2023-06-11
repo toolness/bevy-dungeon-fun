@@ -4,5 +4,7 @@
     "player_capsule_radius": 0.25,
     "player_capsule_cylinder_height": 1.0,
     "mouse_sensitivity": 0.00012,
-    "emissive_scale": 10.0
+    "emissive_scale": 10.0,
+    "gravity": 9.8,
+    "jump_velocity": 5.0
 }

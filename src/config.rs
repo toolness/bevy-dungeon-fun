@@ -19,6 +19,10 @@ pub struct Config {
     /// This will put the colors into the HDR space so bevy can apply
     /// bloom to it, etc.
     pub emissive_scale: f32,
+    /// Gravity in meters per second squared.
+    pub gravity: f32,
+    /// Jump velocity in meters per second.
+    pub jump_velocity: f32,
 }
 
 fn load_config(asset_server: ResMut<AssetServer>, mut loading: ResMut<AssetsLoading>) {

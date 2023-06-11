@@ -10,13 +10,13 @@ use bevy_rapier3d::prelude::*;
 
 use crate::{app_state::AppState, config::Config};
 
-/// Gravity speed in meters per second.
-const GRAVITY_SPEED: f32 = 5.0;
-
 const MAX_PITCH: f32 = FRAC_PI_2 - 0.01;
 
-#[derive(Component)]
-pub struct Player;
+#[derive(Component, Default)]
+pub struct Player {
+    velocity: Vec3,
+    grounded: bool,
+}
 
 pub struct PlayerMovement;
 
@@ -49,7 +49,7 @@ fn setup_player(mut commands: Commands, config: Res<Config>) {
                 up: Vec3::Y,
                 ..default()
             },
-            Player,
+            Player::default(),
         ))
         .id();
     commands.entity(player_capsule).push_children(&[camera]);
@@ -58,13 +58,13 @@ fn setup_player(mut commands: Commands, config: Res<Config>) {
 fn player_movement(
     time: Res<Time>,
     keys: Res<Input<KeyCode>>,
-    mut controller_query: Query<&mut KinematicCharacterController>,
+    mut player_query: Query<(&mut KinematicCharacterController, &mut Player)>,
     camera_query: Query<(&Parent, &Transform), With<Camera>>,
     mut player_movement: EventWriter<PlayerMovement>,
     config: Res<Config>,
 ) {
     for (parent, transform) in &camera_query {
-        let Ok(mut controller) = controller_query.get_mut(parent.get()) else {
+        let Ok((mut controller, mut player)) = player_query.get_mut(parent.get()) else {
             warn!("Parent of camera has no kinematic character controller!");
             continue;
         };
@@ -73,6 +73,17 @@ fn player_movement(
         let local_z = transform.local_z();
         let forward = -Vec3::new(local_z.x, 0., local_z.z);
         let right = Vec3::new(local_z.z, 0., -local_z.x);
+
+        if keys.just_pressed(KeyCode::Space) && player.grounded {
+            player.velocity = Vec3::new(0.0, config.jump_velocity, 0.0);
+            player.grounded = false;
+        } else if player.grounded && player.velocity.y < 0.0 {
+            // Don't set this to 0 or the physics engine will constantly flip us between
+            // being grounded and not-grounded each frame.
+            player.velocity.y = -0.1;
+        } else if !player.grounded {
+            player.velocity.y -= config.gravity * time.delta_seconds();
+        }
 
         for key in keys.get_pressed() {
             match key {
@@ -98,10 +109,18 @@ fn player_movement(
             player_movement.send(PlayerMovement);
         }
 
-        let gravity = Vec3::NEG_Y * GRAVITY_SPEED * time.delta_seconds();
-        let desired_translation = velocity * time.delta_seconds() * config.player_speed + gravity;
+        let desired_translation = velocity * time.delta_seconds() * config.player_speed
+            + player.velocity * time.delta_seconds();
 
         controller.translation = Some(desired_translation);
+    }
+}
+
+fn update_player_after_physics(
+    mut query: Query<(&mut Player, &KinematicCharacterControllerOutput)>,
+) {
+    for (mut player, output) in query.iter_mut() {
+        player.grounded = output.grounded;
     }
 }
 
@@ -148,7 +167,10 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_system(setup_player.in_schedule(OnEnter(AppState::SettingUpScene)))
             .add_startup_system(grab_cursor)
-            .add_systems((player_movement, player_look).in_set(OnUpdate(AppState::InGame)))
+            .add_systems(
+                (player_movement, player_look, update_player_after_physics)
+                    .in_set(OnUpdate(AppState::InGame)),
+            )
             .add_event::<PlayerMovement>();
     }
 }
