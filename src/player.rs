@@ -65,6 +65,38 @@ fn setup_player(mut commands: Commands, config: Res<Config>) {
     commands.entity(player_capsule).push_children(&[camera]);
 }
 
+fn log_player_target_on_click(
+    buttons: Res<Input<MouseButton>>,
+    rapier_context: Res<RapierContext>,
+    player_query: Query<Entity, With<Player>>,
+    camera_query: Query<(&Parent, &Transform, &GlobalTransform), With<Camera>>,
+    entity_names: Query<&Name>,
+) {
+    if buttons.just_pressed(MouseButton::Left) {
+        for (parent, transform, global_transform) in &camera_query {
+            let Ok(player) = player_query.get(parent.get()) else {
+                warn!("Parent of camera has no kinematic character controller!");
+                continue;
+            };
+            let ray_pos = global_transform.translation();
+            let ray_dir: Vec3 = -transform.local_z();
+            info!("ray_pos={:?} ray_dir={:?}", ray_pos, ray_dir);
+            let filter = QueryFilter::new();
+            if let Some((entity, toi)) = rapier_context.cast_ray(
+                ray_pos,
+                ray_dir,
+                Real::MAX,
+                true,
+                filter.exclude_rigid_body(player),
+            ) {
+                if let Ok(name) = entity_names.get(entity) {
+                    info!("HIT '{}' toi={}", name, toi);
+                }
+            }
+        }
+    }
+}
+
 fn player_movement(
     time: Res<Time>,
     keys: Res<Input<KeyCode>>,
@@ -205,6 +237,7 @@ impl Plugin for PlayerPlugin {
                     maybe_respawn_player,
                     player_movement,
                     player_look,
+                    log_player_target_on_click,
                     update_player_after_physics,
                 )
                     .in_set(OnUpdate(AppState::InGame)),
