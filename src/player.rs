@@ -65,19 +65,25 @@ fn setup_player(mut commands: Commands, config: Res<Config>) {
     commands.entity(player_capsule).push_children(&[camera]);
 }
 
-fn log_player_target_on_click(
+fn player_grab(
+    mut commands: Commands,
     buttons: Res<Input<MouseButton>>,
     rapier_context: Res<RapierContext>,
-    player_query: Query<Entity, With<Player>>,
+    player_query: Query<(Entity, Option<&ImpulseJoint>), With<Player>>,
     camera_query: Query<(&Parent, &Transform, &GlobalTransform), With<Camera>>,
     entity_names: Query<&Name>,
+    rigid_bodies: Query<&RigidBody>,
 ) {
     if buttons.just_pressed(MouseButton::Left) {
         for (parent, transform, global_transform) in &camera_query {
-            let Ok(player) = player_query.get(parent.get()) else {
+            let Ok((player, maybe_joint)) = player_query.get(parent.get()) else {
                 warn!("Parent of camera has no kinematic character controller!");
                 continue;
             };
+            if maybe_joint.is_some() {
+                commands.entity(player).remove::<ImpulseJoint>();
+                continue;
+            }
             let ray_pos = global_transform.translation();
             let ray_dir: Vec3 = -transform.local_z();
             info!("ray_pos={:?} ray_dir={:?}", ray_pos, ray_dir);
@@ -89,8 +95,20 @@ fn log_player_target_on_click(
                 true,
                 filter.exclude_rigid_body(player),
             ) {
-                if let Ok(name) = entity_names.get(entity) {
-                    info!("HIT '{}' toi={}", name, toi);
+                let Ok(name) = entity_names.get(entity) else {
+                    continue;
+                };
+
+                info!("HIT '{}' toi={}", name, toi);
+
+                if let Ok(rigid_body) = rigid_bodies.get(entity) {
+                    if *rigid_body == RigidBody::Dynamic {
+                        let joint = FixedJointBuilder::new()
+                            .local_anchor1(-transform.translation - ray_dir * toi);
+                        commands
+                            .entity(player)
+                            .insert(ImpulseJoint::new(entity, joint));
+                    }
                 }
             }
         }
@@ -237,7 +255,7 @@ impl Plugin for PlayerPlugin {
                     maybe_respawn_player,
                     player_movement,
                     player_look,
-                    log_player_target_on_click,
+                    player_grab,
                     update_player_after_physics,
                 )
                     .in_set(OnUpdate(AppState::InGame)),
