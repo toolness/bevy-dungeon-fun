@@ -31,8 +31,8 @@ pub struct Config {
     pub spawn_position: Vec3,
     /// Instructions shown at beginning of game.
     pub instructions: String,
-    pub player_grab_max_distance: f32,
-    pub player_grab_lift_off_ground_distance: f32,
+    pub player_force_push_max_distance: f32,
+    pub player_force_push_velocity: f32,
 }
 
 fn load_config(asset_server: ResMut<AssetServer>, mut loading: ResMut<AssetsLoading>) {

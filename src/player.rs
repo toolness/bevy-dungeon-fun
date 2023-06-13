@@ -65,33 +65,31 @@ fn setup_player(mut commands: Commands, config: Res<Config>) {
     commands.entity(player_capsule).push_children(&[camera]);
 }
 
-fn player_grab(
+fn player_force_push(
     mut commands: Commands,
     buttons: Res<Input<MouseButton>>,
     rapier_context: Res<RapierContext>,
-    player_query: Query<(Entity, &Transform, Option<&ImpulseJoint>), With<Player>>,
+    player_query: Query<Entity, With<Player>>,
     camera_query: Query<(&Parent, &Transform, &GlobalTransform), With<Camera>>,
     entity_names: Query<&Name>,
-    rigid_bodies: Query<(&Transform, &RigidBody)>,
+    rigid_bodies: Query<&RigidBody>,
     config: Res<Config>,
 ) {
-    if buttons.just_pressed(MouseButton::Left) {
+    let was_left_pressed = buttons.just_pressed(MouseButton::Left);
+    let was_right_pressed = buttons.just_pressed(MouseButton::Right);
+    if was_left_pressed || was_right_pressed {
         for (parent, transform, global_transform) in &camera_query {
-            let Ok((player, player_transform, maybe_joint)) = player_query.get(parent.get()) else {
+            let Ok(player) = player_query.get(parent.get()) else {
                 warn!("Parent of camera has no kinematic character controller!");
                 continue;
             };
-            if maybe_joint.is_some() {
-                commands.entity(player).remove::<ImpulseJoint>();
-                continue;
-            }
             let ray_pos = global_transform.translation();
             let ray_dir: Vec3 = -transform.local_z();
             let filter = QueryFilter::new();
             if let Some((entity, toi)) = rapier_context.cast_ray(
                 ray_pos,
                 ray_dir,
-                config.player_grab_max_distance,
+                config.player_force_push_max_distance,
                 true,
                 filter.exclude_rigid_body(player),
             ) {
@@ -101,16 +99,15 @@ fn player_grab(
 
                 info!("HIT '{}' toi={}", name, toi);
 
-                if let Ok((rigid_body_transform, rigid_body)) = rigid_bodies.get(entity) {
+                if let Ok(rigid_body) = rigid_bodies.get(entity) {
                     if *rigid_body == RigidBody::Dynamic {
-                        let joint = FixedJointBuilder::new().local_anchor1(
-                            player_transform.translation
-                                - rigid_body_transform.translation
-                                - Vec3::Y * config.player_grab_lift_off_ground_distance,
-                        );
-                        commands
-                            .entity(player)
-                            .insert(ImpulseJoint::new(entity, joint));
+                        let impulse = ExternalImpulse {
+                            impulse: ray_dir
+                                * config.player_force_push_velocity
+                                * if was_left_pressed { 1.0 } else { -1.0 },
+                            torque_impulse: Vec3::ZERO,
+                        };
+                        commands.entity(entity).insert(impulse);
                     }
                 }
             }
@@ -258,7 +255,7 @@ impl Plugin for PlayerPlugin {
                     maybe_respawn_player,
                     player_movement,
                     player_look,
-                    player_grab,
+                    player_force_push,
                     update_player_after_physics,
                 )
                     .in_set(OnUpdate(AppState::InGame)),
