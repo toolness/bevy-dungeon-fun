@@ -3,6 +3,8 @@
     "player_camera_height": 1.0,
     "player_capsule_radius": 0.25,
     "player_capsule_cylinder_height": 1.0,
+    "player_grab_max_distance": 2.0,
+    "player_grab_lift_off_ground_distance": 0.5,
     "mouse_sensitivity": 0.00012,
     "emissive_scale": 10.0,
     "gravity": 9.8,

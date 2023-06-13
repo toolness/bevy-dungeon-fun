@@ -69,14 +69,15 @@ fn player_grab(
     mut commands: Commands,
     buttons: Res<Input<MouseButton>>,
     rapier_context: Res<RapierContext>,
-    player_query: Query<(Entity, Option<&ImpulseJoint>), With<Player>>,
+    player_query: Query<(Entity, &Transform, Option<&ImpulseJoint>), With<Player>>,
     camera_query: Query<(&Parent, &Transform, &GlobalTransform), With<Camera>>,
     entity_names: Query<&Name>,
-    rigid_bodies: Query<&RigidBody>,
+    rigid_bodies: Query<(&Transform, &RigidBody)>,
+    config: Res<Config>,
 ) {
     if buttons.just_pressed(MouseButton::Left) {
         for (parent, transform, global_transform) in &camera_query {
-            let Ok((player, maybe_joint)) = player_query.get(parent.get()) else {
+            let Ok((player, player_transform, maybe_joint)) = player_query.get(parent.get()) else {
                 warn!("Parent of camera has no kinematic character controller!");
                 continue;
             };
@@ -86,12 +87,11 @@ fn player_grab(
             }
             let ray_pos = global_transform.translation();
             let ray_dir: Vec3 = -transform.local_z();
-            info!("ray_pos={:?} ray_dir={:?}", ray_pos, ray_dir);
             let filter = QueryFilter::new();
             if let Some((entity, toi)) = rapier_context.cast_ray(
                 ray_pos,
                 ray_dir,
-                Real::MAX,
+                config.player_grab_max_distance,
                 true,
                 filter.exclude_rigid_body(player),
             ) {
@@ -101,10 +101,13 @@ fn player_grab(
 
                 info!("HIT '{}' toi={}", name, toi);
 
-                if let Ok(rigid_body) = rigid_bodies.get(entity) {
+                if let Ok((rigid_body_transform, rigid_body)) = rigid_bodies.get(entity) {
                     if *rigid_body == RigidBody::Dynamic {
-                        let joint = FixedJointBuilder::new()
-                            .local_anchor1(-transform.translation - ray_dir * toi);
+                        let joint = FixedJointBuilder::new().local_anchor1(
+                            player_transform.translation
+                                - rigid_body_transform.translation
+                                - Vec3::Y * config.player_grab_lift_off_ground_distance,
+                        );
                         commands
                             .entity(player)
                             .insert(ImpulseJoint::new(entity, joint));
