@@ -8,7 +8,7 @@ use bevy::{
 };
 use bevy_rapier3d::prelude::*;
 
-use crate::{app_state::AppState, config::Config};
+use crate::{app_state::AppState, config::Config, debug_mode::is_in_debug_mode};
 
 const MAX_PITCH: f32 = FRAC_PI_2 - 0.01;
 
@@ -250,8 +250,8 @@ impl Plugin for PlayerPlugin {
                 (
                     maybe_respawn_player,
                     player_movement,
-                    player_look,
-                    player_force_push,
+                    player_look.run_if(not(is_in_debug_mode)),
+                    player_force_push.run_if(not(is_in_debug_mode)),
                     update_player_after_physics,
                 )
                     .in_set(OnUpdate(AppState::InGame)),

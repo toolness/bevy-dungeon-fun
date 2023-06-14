@@ -1,5 +1,6 @@
 mod app_state;
 mod config;
+mod debug_mode;
 mod dungeon_scene;
 mod instructions;
 mod player;
@@ -8,6 +9,7 @@ use app_state::AppState;
 use bevy::{input::keyboard, pbr::PointLightShadowMap, prelude::*, window::WindowMode};
 use bevy_rapier3d::prelude::*;
 use config::ConfigPlugin;
+use debug_mode::DebugModePlugin;
 use dungeon_scene::DungeonScenePlugin;
 use instructions::InstructionsPlugin;
 use player::PlayerPlugin;
@@ -52,6 +54,7 @@ fn main() {
         .add_plugin(PlayerPlugin)
         .add_plugin(DungeonScenePlugin)
         .add_plugin(InstructionsPlugin)
+        .add_plugin(DebugModePlugin)
         .add_system(toggle_debug_mode)
         .run();
 }
