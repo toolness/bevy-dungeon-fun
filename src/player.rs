@@ -250,7 +250,7 @@ impl Plugin for PlayerPlugin {
             .add_systems(
                 (
                     maybe_respawn_player,
-                    player_movement,
+                    player_movement.run_if(not(is_in_debug_mode)),
                     player_look.run_if(not(is_in_debug_mode)),
                     player_force_push.run_if(not(is_in_debug_mode)),
                     update_player_after_physics,
