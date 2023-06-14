@@ -75,9 +75,7 @@ fn player_force_push(
     rigid_bodies: Query<&RigidBody>,
     config: Res<Config>,
 ) {
-    let was_left_pressed = buttons.just_pressed(MouseButton::Left);
-    let was_right_pressed = buttons.just_pressed(MouseButton::Right);
-    if was_left_pressed || was_right_pressed {
+    if buttons.just_pressed(MouseButton::Right) {
         for (parent, transform, global_transform) in &camera_query {
             let Ok(player) = player_query.get(parent.get()) else {
                 warn!("Parent of camera has no kinematic character controller!");
@@ -102,9 +100,7 @@ fn player_force_push(
                 if let Ok(rigid_body) = rigid_bodies.get(entity) {
                     if *rigid_body == RigidBody::Dynamic {
                         let impulse = ExternalImpulse {
-                            impulse: ray_dir
-                                * config.player_force_push_velocity
-                                * if was_left_pressed { 1.0 } else { -1.0 },
+                            impulse: -ray_dir * config.player_force_push_velocity,
                             torque_impulse: Vec3::ZERO,
                         };
                         commands.entity(entity).insert(impulse);
