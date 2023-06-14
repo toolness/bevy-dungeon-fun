@@ -55,7 +55,7 @@ fn main() {
         .add_plugin(DungeonScenePlugin)
         .add_plugin(InstructionsPlugin)
         .add_plugin(DebugModePlugin)
-        .add_system(toggle_debug_mode)
+        .add_system(toggle_rapier_debug_render_mode)
         .run();
 }
 
@@ -63,7 +63,7 @@ fn is_not_wasm() -> bool {
     !cfg!(target_arch = "wasm32")
 }
 
-fn toggle_debug_mode(
+fn toggle_rapier_debug_render_mode(
     keyboard_input: Res<Input<keyboard::KeyCode>>,
     mut context: ResMut<DebugRenderContext>,
 ) {
