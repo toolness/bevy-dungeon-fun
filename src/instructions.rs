@@ -46,6 +46,7 @@ fn show_instructions(mut commands: Commands, fonts: Res<Fonts>, config: Res<Conf
                 ..Default::default()
             }),
         InstructionText,
+        Name::new("Instructions"),
     ));
 }
 

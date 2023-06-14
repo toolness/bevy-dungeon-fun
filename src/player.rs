@@ -60,6 +60,7 @@ fn setup_player(mut commands: Commands, config: Res<Config>) {
                 ..default()
             },
             Player::default(),
+            Name::new("Player"),
         ))
         .id();
     commands.entity(player_capsule).push_children(&[camera]);
