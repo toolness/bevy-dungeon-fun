@@ -15,7 +15,7 @@ use instructions::InstructionsPlugin;
 use player::PlayerPlugin;
 
 fn main() {
-    let windowed = std::env::args().any(|a| a == "--windowed");
+    let windowed = std::env::args().any(|a| a == "--windowed" || a == "-w");
     let mode = if windowed {
         WindowMode::Windowed
     } else {
