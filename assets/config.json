@@ -11,5 +11,22 @@
     "jump_velocity": 5.0,
     "fall_off_level_y": -50.0,
     "spawn_position": [0, 0, 0],
+    "ambient_color": {
+        "Rgba": {
+            "red": 0.052,
+            "green": 0.049,
+            "blue": 0.097,
+            "alpha": 1.0
+        }
+    },
+    "ambient_brightness": 1.0,
+    "clear_color": {
+        "Rgba": {
+            "red": 0.052,
+            "green": 0.049,
+            "blue": 0.097,
+            "alpha": 1.0
+        }
+    },
     "instructions": "Use WASD to move and mouse to look.\nPress space to jump.\nClick the right mouse button to pull an object towards you."
 }

@@ -33,6 +33,9 @@ pub struct Config {
     pub instructions: String,
     pub player_force_push_max_distance: f32,
     pub player_force_push_velocity: f32,
+    pub ambient_color: Color,
+    pub ambient_brightness: f32,
+    pub clear_color: Color,
 }
 
 fn load_config(asset_server: ResMut<AssetServer>, mut loading: ResMut<AssetsLoading>) {

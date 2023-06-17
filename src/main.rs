@@ -21,19 +21,8 @@ fn main() {
     } else {
         WindowMode::BorderlessFullscreen
     };
-    let blueish = Color::Rgba {
-        red: 0.052,
-        green: 0.049,
-        blue: 0.097,
-        alpha: 1.0,
-    };
     App::new()
         .add_state::<AppState>()
-        .insert_resource(AmbientLight {
-            color: blueish,
-            brightness: 5.0 / 5.0f32,
-        })
-        .insert_resource(ClearColor(blueish))
         .insert_resource(PointLightShadowMap { size: 4096 })
         .insert_resource(Msaa::Sample4)
         .add_plugins(DefaultPlugins.set(WindowPlugin {

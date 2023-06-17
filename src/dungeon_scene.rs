@@ -30,6 +30,7 @@ impl Plugin for DungeonScenePlugin {
             .add_system(wait_for_scene_to_load.in_set(OnUpdate(AppState::LoadingAssets)))
             .add_systems(
                 (
+                    set_global_rendering_resources,
                     fix_scene_emissive_materials,
                     fix_scene_point_lights,
                     fix_scene_torches,
@@ -40,6 +41,14 @@ impl Plugin for DungeonScenePlugin {
                     .in_schedule(OnEnter(AppState::SettingUpScene)),
             );
     }
+}
+
+fn set_global_rendering_resources(mut commands: Commands, config: Res<Config>) {
+    commands.insert_resource(AmbientLight {
+        color: config.ambient_color,
+        brightness: config.ambient_brightness,
+    });
+    commands.insert_resource(ClearColor(config.clear_color));
 }
 
 fn wait_for_scene_to_load(
