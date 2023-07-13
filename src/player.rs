@@ -246,8 +246,8 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(setup_player.in_schedule(OnEnter(AppState::SettingUpScene)))
-            .add_startup_system(grab_cursor)
+        app.add_systems(OnEnter(AppState::SettingUpScene), setup_player)
+            .add_systems(Startup, grab_cursor)
             .add_systems(
                 Update,
                 (

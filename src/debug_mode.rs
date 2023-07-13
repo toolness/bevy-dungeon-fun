@@ -38,9 +38,9 @@ impl Plugin for DebugModePlugin {
         {
             #[cfg(feature = "debug_mode")]
             {
-                app.add_system(toggle_grab_cursor);
+                app.add_systems(Update, toggle_grab_cursor);
                 let inspector = bevy_inspector_egui::quick::WorldInspectorPlugin::new();
-                app.add_plugin(inspector.run_if(is_in_debug_mode));
+                app.add_plugins(inspector.run_if(is_in_debug_mode));
             }
         }
     }
