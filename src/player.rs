@@ -255,7 +255,7 @@ impl Plugin for PlayerPlugin {
                     player_force_push.run_if(not(is_in_debug_mode)),
                     update_player_after_physics,
                 )
-                    .in_set(OnUpdate(AppState::InGame)),
+                    .run_if(in_state(AppState::InGame)),
             )
             .add_event::<PlayerMovement>();
     }

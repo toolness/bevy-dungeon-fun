@@ -65,6 +65,6 @@ impl Plugin for InstructionsPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(load_fonts)
             .add_system(show_instructions.in_schedule(OnEnter(AppState::InGame)))
-            .add_system(hide_instructions.in_set(OnUpdate(AppState::InGame)));
+            .add_system(hide_instructions.run_if(in_state(AppState::InGame)));
     }
 }

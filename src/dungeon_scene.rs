@@ -27,7 +27,7 @@ impl Plugin for DungeonScenePlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(load_scene)
             .init_resource::<AssetsLoading>()
-            .add_system(wait_for_scene_to_load.in_set(OnUpdate(AppState::LoadingAssets)))
+            .add_system(wait_for_scene_to_load.run_if(in_state(AppState::LoadingAssets)))
             .add_systems(
                 (
                     set_global_rendering_resources,
