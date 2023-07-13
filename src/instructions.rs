@@ -38,11 +38,8 @@ fn show_instructions(mut commands: Commands, fonts: Res<Fonts>, config: Res<Conf
             .with_text_alignment(TextAlignment::Left)
             .with_style(Style {
                 position_type: PositionType::Absolute,
-                position: UiRect {
-                    left: Val::Px(10.0),
-                    top: Val::Px(10.0),
-                    ..Default::default()
-                },
+                left: Val::Px(10.0),
+                top: Val::Px(10.0),
                 ..Default::default()
             }),
         InstructionText,
@@ -66,8 +63,8 @@ pub struct InstructionsPlugin;
 
 impl Plugin for InstructionsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(load_fonts)
-            .add_system(show_instructions.in_schedule(OnEnter(AppState::InGame)))
-            .add_system(hide_instructions.in_set(OnUpdate(AppState::InGame)));
+        app.add_systems(Startup, load_fonts)
+            .add_systems(OnEnter(AppState::InGame), show_instructions)
+            .add_systems(Update, hide_instructions.run_if(in_state(AppState::InGame)));
     }
 }

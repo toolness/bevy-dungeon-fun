@@ -3,7 +3,9 @@ use bevy_common_assets::json::JsonAssetPlugin;
 
 use crate::app_state::{AppState, AssetsLoading};
 
-#[derive(serde::Deserialize, bevy::reflect::TypeUuid, Resource, Default, Clone)]
+#[derive(
+    serde::Deserialize, bevy::reflect::TypeUuid, bevy::reflect::TypePath, Resource, Default, Clone,
+)]
 #[uuid = "83187ffe-c216-4626-803f-e2a96e016323"]
 pub struct Config {
     /// Player speed in meters per second.
@@ -59,9 +61,9 @@ pub struct ConfigPlugin;
 
 impl Plugin for ConfigPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(JsonAssetPlugin::<Config>::new(&["json"]))
+        app.add_plugins(JsonAssetPlugin::<Config>::new(&["json"]))
             .init_resource::<Config>()
-            .add_startup_system(load_config)
-            .add_system(apply_config.in_schedule(OnExit(AppState::LoadingAssets)));
+            .add_systems(Startup, load_config)
+            .add_systems(OnExit(AppState::LoadingAssets), apply_config);
     }
 }

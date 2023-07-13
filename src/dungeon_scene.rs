@@ -25,10 +25,14 @@ pub struct DungeonScenePlugin;
 
 impl Plugin for DungeonScenePlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(load_scene)
+        app.add_systems(Startup, load_scene)
             .init_resource::<AssetsLoading>()
-            .add_system(wait_for_scene_to_load.in_set(OnUpdate(AppState::LoadingAssets)))
             .add_systems(
+                Update,
+                wait_for_scene_to_load.run_if(in_state(AppState::LoadingAssets)),
+            )
+            .add_systems(
+                OnEnter(AppState::SettingUpScene),
                 (
                     set_global_rendering_resources,
                     fix_scene_emissive_materials,
@@ -37,8 +41,7 @@ impl Plugin for DungeonScenePlugin {
                     fix_scene_physics,
                     start_game,
                 )
-                    .chain()
-                    .in_schedule(OnEnter(AppState::SettingUpScene)),
+                    .chain(),
             );
     }
 }

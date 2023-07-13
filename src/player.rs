@@ -18,6 +18,7 @@ pub struct Player {
     grounded: bool,
 }
 
+#[derive(Event)]
 pub struct PlayerMovement;
 
 fn player_spawn_transform(config: &Config) -> Transform {
@@ -245,9 +246,10 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(setup_player.in_schedule(OnEnter(AppState::SettingUpScene)))
-            .add_startup_system(grab_cursor)
+        app.add_systems(OnEnter(AppState::SettingUpScene), setup_player)
+            .add_systems(Startup, grab_cursor)
             .add_systems(
+                Update,
                 (
                     maybe_respawn_player,
                     player_movement.run_if(not(is_in_debug_mode)),
@@ -255,7 +257,7 @@ impl Plugin for PlayerPlugin {
                     player_force_push.run_if(not(is_in_debug_mode)),
                     update_player_after_physics,
                 )
-                    .in_set(OnUpdate(AppState::InGame)),
+                    .run_if(in_state(AppState::InGame)),
             )
             .add_event::<PlayerMovement>();
     }
