@@ -38,11 +38,8 @@ fn show_instructions(mut commands: Commands, fonts: Res<Fonts>, config: Res<Conf
             .with_text_alignment(TextAlignment::Left)
             .with_style(Style {
                 position_type: PositionType::Absolute,
-                position: UiRect {
-                    left: Val::Px(10.0),
-                    top: Val::Px(10.0),
-                    ..Default::default()
-                },
+                left: Val::Px(10.0),
+                top: Val::Px(10.0),
                 ..Default::default()
             }),
         InstructionText,
