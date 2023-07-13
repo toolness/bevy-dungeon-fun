@@ -34,7 +34,6 @@ fn main() {
         }))
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin {
-            always_on_top: true,
             enabled: false,
             ..default()
         })
