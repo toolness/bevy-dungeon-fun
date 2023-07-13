@@ -37,6 +37,11 @@ fn main() {
             enabled: false,
             ..default()
         })
+        .insert_resource(GizmoConfig {
+            enabled: true,
+            depth_bias: -1.0,
+            ..Default::default()
+        })
         .add_systems(Update, bevy::window::close_on_esc.run_if(is_not_wasm))
         .add_plugins(ConfigPlugin)
         .add_plugins(PlayerPlugin)
