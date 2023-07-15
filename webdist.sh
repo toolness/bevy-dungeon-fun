@@ -1,3 +1,4 @@
+export RUSTFLAGS=--cfg=web_sys_unstable_apis
 cargo build --release --target wasm32-unknown-unknown
 wasm-bindgen --out-dir out --target web ./target/wasm32-unknown-unknown/release/bevy-fun2.wasm
 rm -rf dist
