@@ -32,19 +32,23 @@ fn main() {
             }),
             ..Default::default()
         }))
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(RapierDebugRenderPlugin {
-            always_on_top: true,
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
+        .add_plugins(RapierDebugRenderPlugin {
             enabled: false,
             ..default()
         })
-        .add_system(bevy::window::close_on_esc.run_if(is_not_wasm))
-        .add_plugin(ConfigPlugin)
-        .add_plugin(PlayerPlugin)
-        .add_plugin(DungeonScenePlugin)
-        .add_plugin(InstructionsPlugin)
-        .add_plugin(DebugModePlugin)
-        .add_system(toggle_rapier_debug_render_mode)
+        .insert_resource(GizmoConfig {
+            enabled: true,
+            depth_bias: -1.0,
+            ..Default::default()
+        })
+        .add_systems(Update, bevy::window::close_on_esc.run_if(is_not_wasm))
+        .add_plugins(ConfigPlugin)
+        .add_plugins(PlayerPlugin)
+        .add_plugins(DungeonScenePlugin)
+        .add_plugins(InstructionsPlugin)
+        .add_plugins(DebugModePlugin)
+        .add_systems(Update, toggle_rapier_debug_render_mode)
         .run();
 }
 
